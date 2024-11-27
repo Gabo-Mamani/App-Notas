@@ -27,7 +27,9 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(fontSize: 20, color: theme.primary()),
                   )),
             ),
-            ElevatedButton(onPressed: (){}, child: Text("Acción"))
+            ElevatedButton(
+              onPressed: ()=>theme.changeTheme(),
+              child: Text("Acción"))
           ],
         ));
     });

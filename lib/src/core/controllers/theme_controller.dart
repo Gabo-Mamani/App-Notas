@@ -18,4 +18,8 @@ class ThemeController{
   Color secondaryButton()=> Configure.SECONDARY_BUTTON_LIGHT;
 
   Color background()=> brightnessValue ? Configure.BACKGROUND_LIGHT : Configure.BACKGROUND_DARK;
+
+  void changeTheme(){
+    brightness.value = !brightnessValue; //Cambio de modo
+  }
 }
