@@ -1,3 +1,5 @@
+import 'package:app_notas/src/core/constants/parameters.dart';
+
 class Note {
   String? title;
   String? date;
@@ -5,7 +7,10 @@ class Note {
   bool private;
   List<String>? urls;
   String? image;
-  
+  TypeNote type;
+  StateNote state;
+
+
   Note({
     this.title,
     this.date,
@@ -13,6 +18,8 @@ class Note {
     this.private = false,
     this.urls,
     this.image,
+    this.type = TypeNote.Text,
+    this.state = StateNote.Visible,
   });
 }
 
