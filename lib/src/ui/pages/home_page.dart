@@ -22,7 +22,7 @@ class HomePage extends StatelessWidget {
                 Container(
                   child: Center(
                     child: Text(
-                      "Hola Beber?",
+                      "Hola",
                       style: TextStyle(fontSize: 20, color: theme.primary()),
                   )),
             ),

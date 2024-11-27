@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: Constants.mainTitle,
       initialRoute: HomePage.homePageRoute,
       theme: ThemeData(
-        fontFamily: 'Roboto', // Usa una fuente estándar del sistema o elimina esta línea si no es necesaria
+        fontFamily: 'Roboto', 
       ),
     );
   }
