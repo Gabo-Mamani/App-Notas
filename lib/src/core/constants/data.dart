@@ -1,5 +1,5 @@
 class Constants{
-  static const Map<int, String> NAME_MONTH = {
+  static const Map<int, String> nameMonth= {
     1:"Enero",
     2:"Febrero",
     3:"Marzo",
@@ -14,7 +14,7 @@ class Constants{
     12:"Diciembre"
   };
 
-  static const Map<int,String> NAME_DAY = {
+  static const Map<int,String> nameDay = {
     1:"Lunes",
     2:"Martes",
     3:"Miercoles",
@@ -24,12 +24,12 @@ class Constants{
     7:"Domingo"
   };
 
-  static const Map<String,String> HEADERS = {
+  static const Map<String,String> headers = {
     "content-type": "application-json"
   };
 
-  static const String MAIN_SERVICE = "https:";
+  static const String mainService = "https:";
 
-  static const String  MAIN_TITLE = "Notas";
-  static const String SUB_TITLE = "Bienvenido a la app de notas";
+  static const String  mainTitle = "Notas";
+  static const String subTitle = "Bienvenido a la app de notas";
 }
