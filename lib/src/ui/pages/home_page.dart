@@ -1,5 +1,4 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/ui/configure.dart';
 import 'package:flutter/material.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
@@ -23,7 +22,7 @@ class HomePage extends StatelessWidget {
                 Container(
                   child: Center(
                     child: Text(
-                      "Hola mundo",
+                      "Hola Beber?",
                       style: TextStyle(fontSize: 20, color: theme.primary()),
                   )),
             ),
