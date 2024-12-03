@@ -1,5 +1,8 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
 
@@ -28,8 +31,17 @@ class HomePage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: ()=>theme.changeTheme(),
-              child: Text("Acción"))
-          ],
+              child: Text("Acción")),
+            ElevatedButton(
+              onPressed: () async {
+                if (await canLaunch(
+                  "https://pub.dev/packages/url_launcher/example")) {
+                    launch(
+                      "https://pub.dev/packages/url_launcher/example");
+                    }
+                  },
+                  child: Text("url"))
+                ],
         ));
     });
   }
