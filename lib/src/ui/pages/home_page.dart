@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
+import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
+import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -40,7 +42,11 @@ class HomePage extends StatelessWidget {
                       "https://pub.dev/packages/url_launcher/example");
                     }
                   },
-                  child: Text("url"))
+                  child: Text("url")),
+                  MediumButton(title: "Boton nuevo",
+                  onTap: (){},
+                  ),
+                  CardButton(title: "PDF",icon: Icons.book,)
                 ],
         ));
     });
