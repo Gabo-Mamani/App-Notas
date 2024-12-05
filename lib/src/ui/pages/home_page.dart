@@ -3,14 +3,33 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
+import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
 
-class HomePage extends StatelessWidget {
-  const HomePage({ Key? key }) : super(key: key);
+class HomePage extends StatefulWidget {
+  HomePage({ Key? key }) : super(key: key);
   static const homePageRoute = "home_page";
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  late TextEditingController _controller1;
+  late TextEditingController _controller2;
+
+
+  @override
+  void initState() {
+    _controller1 = TextEditingController(text: "");
+    _controller2 = TextEditingController(text: "");
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +65,18 @@ class HomePage extends StatelessWidget {
                   MediumButton(title: "Boton nuevo",
                   onTap: (){},
                   ),
-                  CardButton(title: "PDF",icon: Icons.book,)
+                  CardButton(
+                    title: "PDF",
+                    icon: Icons.book,
+                    ),
+                  TextInput(
+                    title: "entrada",
+                    controller: _controller1
+                  ),
+                  LargeTextInput(
+                    title: "largo",
+                    controller: _controller2
+                    )
                 ],
         ));
     });
