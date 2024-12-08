@@ -3,6 +3,7 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
+import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -76,6 +77,10 @@ class _HomePageState extends State<HomePage> {
                   LargeTextInput(
                     title: "largo",
                     controller: _controller2
+                    ),
+                    ImageTile(
+                      title: "Menu",
+                      description: "Esta es la descripcion de nuestro tile",
                     )
                 ],
         ));
