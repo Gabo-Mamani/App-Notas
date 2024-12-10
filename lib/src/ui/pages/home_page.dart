@@ -3,12 +3,15 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
+import 'package:app_notas/src/ui/widgets/custom_tiles/chek_tile.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
+import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
+GlobalKey<ScaffoldMessengerState> homePageMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 class HomePage extends StatefulWidget {
   HomePage({ Key? key }) : super(key: key);
@@ -38,52 +41,58 @@ class _HomePageState extends State<HomePage> {
       valueListenable: ThemeController.instance.brightness,
       builder: (BuildContext context, value, Widget? child) {
         final theme = ThemeController.instance;
-        return Scaffold( 
-            backgroundColor: theme.background(),
-            key: homePageKey,
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  child: Center(
-                    child: Text(
-                      "Hola",
-                      style: TextStyle(fontSize: 20, color: theme.primary()),
-                  )),
-            ),
-            ElevatedButton(
-              onPressed: ()=>theme.changeTheme(),
-              child: Text("Acción")),
-            ElevatedButton(
-              onPressed: () async {
-                if (await canLaunch(
-                  "https://pub.dev/packages/url_launcher/example")) {
-                    launch(
-                      "https://pub.dev/packages/url_launcher/example");
-                    }
-                  },
-                  child: Text("url")),
-                  MediumButton(title: "Boton nuevo",
-                  onTap: (){},
-                  ),
-                  CardButton(
-                    title: "PDF",
-                    icon: Icons.book,
+        return ScaffoldMessenger(
+          key: homePageMessengerKey,
+          child: Scaffold( 
+              backgroundColor: theme.background(),
+              key: homePageKey,
+              body: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Center(
+                      child: Text(
+                        "Hola",
+                        style: TextStyle(fontSize: 20, color: theme.primary()),
+                    )),
+              ),
+              ElevatedButton(
+                onPressed: ()=>theme.changeTheme(),
+                child: Text("Acción")),
+              ElevatedButton(
+                onPressed: () async {
+                  if (await canLaunch(
+                    "https://pub.dev/packages/url_launcher/example")) {
+                      launch(
+                        "https://pub.dev/packages/url_launcher/example");
+                      }
+                    },
+                      child: Text("url")),
+                    MediumButton(
+                    title: "Boton nuevo",
+                    onTap: () => showSnackBar(homePageMessengerKey, "Hola Snackbar"),
                     ),
-                  TextInput(
-                    title: "entrada",
-                    controller: _controller1
-                  ),
-                  LargeTextInput(
-                    title: "largo",
-                    controller: _controller2
+                    CardButton(
+                      title: "PDF",
+                      icon: Icons.book,
+                      ),
+                    TextInput(
+                      title: "entrada",
+                      controller: _controller1
                     ),
-                    ImageTile(
-                      title: "Menu",
-                      description: "Esta es la descripcion de nuestro tile",
-                    )
-                ],
-        ));
+                    LargeTextInput(
+                      title: "largo",
+                      controller: _controller2
+                      ),
+                      ImageTile(
+                        title: "Menu",
+                        description: "Esta es la descripcion de nuestro tile",
+                      ),
+                      CheckTile(
+                        title: "Check")
+                  ],
+          )),
+        );
     });
   }
 }
