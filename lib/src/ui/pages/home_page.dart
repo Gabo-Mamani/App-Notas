@@ -3,6 +3,7 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
@@ -22,7 +23,7 @@ GlobalKey<ScaffoldMessengerState> homePageMessengerKey =
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
-  static const homePageRoute = "home_page";
+  static const HOME_PAGE_ROUTE = "home_page";
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -67,6 +68,10 @@ class _HomePageState extends State<HomePage> {
                         ElevatedButton(
                             onPressed: () => theme.changeTheme(),
                             child: Text("Acción")),
+                        ElevatedButton(
+                            onPressed: () => Navigator.pushNamed(
+                                context, ErrorPage.ERROR_PAGE_ROUTE),
+                            child: Text("Ruta")),
                         ElevatedButton(
                             onPressed: () async {
                               LoadingWidgetController.instance.loading();
