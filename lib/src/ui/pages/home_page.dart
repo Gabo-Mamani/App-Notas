@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
@@ -10,6 +11,7 @@ import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controller.dart';
 import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
+import 'package:app_notas/src/ui/widgets/status_message/status_message.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -74,18 +76,28 @@ class _HomePageState extends State<HomePage> {
                               LoadingWidgetController.instance.close();
                             },
                             child: Text("Loading")),
-                        Row(
-                          children: [
-                            Flexible(child: SimpleCard(note)),
-                            Flexible(child: ImageCard(note1)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Flexible(child: SimpleCard(note)),
-                            Flexible(child: TextImageCard(note2)),
-                          ],
-                        ),
+                        Container(
+                            height: 350,
+                            width: double.infinity,
+                            child: StatusMessage(() async {
+                              LoadingWidgetController.instance.loading();
+                              LoadingWidgetController.instance
+                                  .changeText("Está Cargando...");
+                              await Future.delayed(Duration(seconds: 2));
+                              LoadingWidgetController.instance.close();
+                            }, StatusNetwork.Exception)),
+                        // Row(
+                        //   children: [
+                        //     Flexible(child: SimpleCard(note)),
+                        //     Flexible(child: ImageCard(note1)),
+                        //   ],
+                        // ),
+                        // Row(
+                        //   children: [
+                        //     Flexible(child: SimpleCard(note)),
+                        //     Flexible(child: TextImageCard(note2)),
+                        //   ],
+                        // ),
                         // ElevatedButton(
                         //     onPressed: () async {
                         //       if (await canLaunch(
