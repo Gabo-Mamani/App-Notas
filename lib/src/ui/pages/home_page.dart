@@ -7,6 +7,8 @@ import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/chek_tile.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
+import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
+import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controller.dart';
 import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
@@ -38,68 +40,87 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: ThemeController.instance.brightness,
-        builder: (BuildContext context, value, Widget? child) {
-          final theme = ThemeController.instance;
-          return ScaffoldMessenger(
-            key: homePageMessengerKey,
-            child: Scaffold(
-                backgroundColor: theme.background(),
-                key: homePageKey,
-                body: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      child: Center(
-                          child: Text(
-                        "Hola",
-                        style: TextStyle(fontSize: 20, color: theme.primary()),
-                      )),
-                    ),
-                    ElevatedButton(
-                        onPressed: () => theme.changeTheme(),
-                        child: Text("Acción")),
-                    Row(
+    return Stack(
+      children: [
+        ValueListenableBuilder(
+            valueListenable: ThemeController.instance.brightness,
+            builder: (BuildContext context, value, Widget? child) {
+              final theme = ThemeController.instance;
+              return ScaffoldMessenger(
+                key: homePageMessengerKey,
+                child: Scaffold(
+                    backgroundColor: theme.background(),
+                    key: homePageKey,
+                    body: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Flexible(child: SimpleCard(note)),
-                        Flexible(child: ImageCard(note1)),
+                        Container(
+                          child: Center(
+                              child: Text(
+                            "Hola",
+                            style:
+                                TextStyle(fontSize: 20, color: theme.primary()),
+                          )),
+                        ),
+                        ElevatedButton(
+                            onPressed: () => theme.changeTheme(),
+                            child: Text("Acción")),
+                        ElevatedButton(
+                            onPressed: () async {
+                              LoadingWidgetController.instance.loading();
+                              LoadingWidgetController.instance
+                                  .changeText("Está Cargando...");
+                              await Future.delayed(Duration(seconds: 2));
+                              LoadingWidgetController.instance.close();
+                            },
+                            child: Text("Loading")),
+                        Row(
+                          children: [
+                            Flexible(child: SimpleCard(note)),
+                            Flexible(child: ImageCard(note1)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Flexible(child: SimpleCard(note)),
+                            Flexible(child: TextImageCard(note2)),
+                          ],
+                        ),
+                        // ElevatedButton(
+                        //     onPressed: () async {
+                        //       if (await canLaunch(
+                        //           "https://pub.dev/packages/url_launcher/example")) {
+                        //         launch(
+                        //             "https://pub.dev/packages/url_launcher/example");
+                        //       }
+                        //     },
+                        //     child: Text("url")),
+                        // MediumButton(
+                        //   title: "Boton nuevo",
+                        //   onTap: () =>
+                        //       showSnackBar(homePageMessengerKey, "Hola Snackbar"),
+                        // ),
+                        // CardButton(
+                        //   title: "PDF",
+                        //   icon: Icons.book,
+                        // ),
+                        // TextInput(title: "entrada", controller: _controller1),
+                        // LargeTextInput(title: "largo", controller: _controller2),
+                        // ImageTile(
+                        //   title: "Menu",
+                        //   description: "Esta es la descripcion de nuestro tile",
+                        // ),
+                        // CheckTile(title: "Check")
                       ],
-                    ),
-                    Row(
-                      children: [
-                        Flexible(child: SimpleCard(note)),
-                        Flexible(child: TextImageCard(note2)),
-                      ],
-                    ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          if (await canLaunch(
-                              "https://pub.dev/packages/url_launcher/example")) {
-                            launch(
-                                "https://pub.dev/packages/url_launcher/example");
-                          }
-                        },
-                        child: Text("url")),
-                    MediumButton(
-                      title: "Boton nuevo",
-                      onTap: () =>
-                          showSnackBar(homePageMessengerKey, "Hola Snackbar"),
-                    ),
-                    CardButton(
-                      title: "PDF",
-                      icon: Icons.book,
-                    ),
-                    TextInput(title: "entrada", controller: _controller1),
-                    LargeTextInput(title: "largo", controller: _controller2),
-                    ImageTile(
-                      title: "Menu",
-                      description: "Esta es la descripcion de nuestro tile",
-                    ),
-                    CheckTile(title: "Check")
-                  ],
-                )),
-          );
-        });
+                    )),
+              );
+            }),
+        ValueListenableBuilder(
+            valueListenable: LoadingWidgetController.instance.loadingNotifier,
+            builder: (context, bool value, Widget? child) {
+              return value ? LoadingWidget() : SizedBox();
+            })
+      ],
+    );
   }
 }
