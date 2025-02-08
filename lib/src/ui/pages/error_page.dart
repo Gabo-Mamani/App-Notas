@@ -80,8 +80,8 @@ class ErrorPage extends StatelessWidget {
                     : Container(),
                 TextButton(
                   child: Text("Volver al inicio"),
-                  onPressed: () => Navigator.pushReplacementNamed(
-                      context, HomePage.HOME_PAGE_ROUTE),
+                  onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                      context, HomePage.HOME_PAGE_ROUTE, (route) => false),
                 ),
               ],
             )

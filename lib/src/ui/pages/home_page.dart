@@ -7,6 +7,8 @@ import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
+import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet.dart';
+import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet_controller.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/chek_tile.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
@@ -29,14 +31,20 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late TextEditingController _controller1;
   late TextEditingController _controller2;
+
+  late CustomBottomSheetController _sheetController;
 
   @override
   void initState() {
     _controller1 = TextEditingController(text: "");
     _controller2 = TextEditingController(text: "");
+    _sheetController = CustomBottomSheetController(this)
+      ..addListener(() {
+        setState(() {});
+      });
 
     super.initState();
   }
@@ -69,9 +77,8 @@ class _HomePageState extends State<HomePage> {
                             onPressed: () => theme.changeTheme(),
                             child: Text("Acción")),
                         ElevatedButton(
-                            onPressed: () => Navigator.pushNamed(
-                                context, ErrorPage.ERROR_PAGE_ROUTE),
-                            child: Text("Ruta")),
+                            onPressed: () => _sheetController.open(),
+                            child: Text("bottom sheet")),
                         ElevatedButton(
                             onPressed: () async {
                               LoadingWidgetController.instance.loading();
@@ -136,7 +143,18 @@ class _HomePageState extends State<HomePage> {
             valueListenable: LoadingWidgetController.instance.loadingNotifier,
             builder: (context, bool value, Widget? child) {
               return value ? LoadingWidget() : SizedBox();
-            })
+            }),
+        Transform.translate(
+          offset: Offset(
+              0,
+              MediaQuery.of(context).size.height +
+                  100 -
+                  (MediaQuery.of(context).size.height *
+                      _sheetController.value)),
+          child: CustomBottomSheet(
+            onTap: () => _sheetController.close(),
+          ),
+        )
       ],
     );
   }
