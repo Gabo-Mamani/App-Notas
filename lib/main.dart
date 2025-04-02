@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,
-          initialRoute: LandingPage.LANDING_PAGE_ROUTE,
+          initialRoute: HomePage.HOME_PAGE_ROUTE,
           theme: ThemeData(
             fontFamily: 'Roboto',
           ),

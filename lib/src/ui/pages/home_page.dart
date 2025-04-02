@@ -17,142 +17,79 @@ import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/status_message/status_message.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
 GlobalKey<ScaffoldMessengerState> homePageMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
-class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
+Color fontColor() {
+  return ThemeController.instance.brightnessValue ? Colors.black : Colors.white;
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
   static const HOME_PAGE_ROUTE = "home_page";
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    final theme = ThemeController.instance;
+
+    return Scaffold(
+      backgroundColor: theme.background(),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+            onPressed: () => Navigator.pop(context)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: fontColor()),
+            onPressed: () {},
+          )
+        ],
+      ),
+      body: _Body(),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late TextEditingController _controller1;
-  late TextEditingController _controller2;
-
-  late CustomBottomSheetController _sheetController;
-
-  @override
-  void initState() {
-    _controller1 = TextEditingController(text: "");
-    _controller2 = TextEditingController(text: "");
-    _sheetController = CustomBottomSheetController(this)
-      ..addListener(() {
-        setState(() {});
-      });
-
-    super.initState();
-  }
+class _Body extends StatelessWidget {
+  const _Body({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
-        ValueListenableBuilder(
-            valueListenable: ThemeController.instance.brightness,
-            builder: (BuildContext context, value, Widget? child) {
-              final theme = ThemeController.instance;
-              return ScaffoldMessenger(
-                key: homePageMessengerKey,
-                child: Scaffold(
-                    backgroundColor: theme.background(),
-                    key: homePageKey,
-                    body: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          child: Center(
-                              child: Text(
-                            "Hola",
-                            style:
-                                TextStyle(fontSize: 20, color: theme.primary()),
-                          )),
-                        ),
-                        ElevatedButton(
-                            onPressed: () => theme.changeTheme(),
-                            child: Text("Acción")),
-                        ElevatedButton(
-                            onPressed: () => _sheetController.open(),
-                            child: Text("bottom sheet")),
-                        ElevatedButton(
-                            onPressed: () async {
-                              LoadingWidgetController.instance.loading();
-                              LoadingWidgetController.instance
-                                  .changeText("Está Cargando...");
-                              await Future.delayed(Duration(seconds: 2));
-                              LoadingWidgetController.instance.close();
-                            },
-                            child: Text("Loading")),
-                        Container(
-                            height: 350,
-                            width: double.infinity,
-                            child: StatusMessage(() async {
-                              LoadingWidgetController.instance.loading();
-                              LoadingWidgetController.instance
-                                  .changeText("Está Cargando...");
-                              await Future.delayed(Duration(seconds: 2));
-                              LoadingWidgetController.instance.close();
-                            }, StatusNetwork.Exception)),
-                        // Row(
-                        //   children: [
-                        //     Flexible(child: SimpleCard(note)),
-                        //     Flexible(child: ImageCard(note1)),
-                        //   ],
-                        // ),
-                        // Row(
-                        //   children: [
-                        //     Flexible(child: SimpleCard(note)),
-                        //     Flexible(child: TextImageCard(note2)),
-                        //   ],
-                        // ),
-                        // ElevatedButton(
-                        //     onPressed: () async {
-                        //       if (await canLaunch(
-                        //           "https://pub.dev/packages/url_launcher/example")) {
-                        //         launch(
-                        //             "https://pub.dev/packages/url_launcher/example");
-                        //       }
-                        //     },
-                        //     child: Text("url")),
-                        // MediumButton(
-                        //   title: "Boton nuevo",
-                        //   onTap: () =>
-                        //       showSnackBar(homePageMessengerKey, "Hola Snackbar"),
-                        // ),
-                        // CardButton(
-                        //   title: "PDF",
-                        //   icon: Icons.book,
-                        // ),
-                        // TextInput(title: "entrada", controller: _controller1),
-                        // LargeTextInput(title: "largo", controller: _controller2),
-                        // ImageTile(
-                        //   title: "Menu",
-                        //   description: "Esta es la descripcion de nuestro tile",
-                        // ),
-                        // CheckTile(title: "Check")
-                      ],
-                    )),
-              );
-            }),
-        ValueListenableBuilder(
-            valueListenable: LoadingWidgetController.instance.loadingNotifier,
-            builder: (context, bool value, Widget? child) {
-              return value ? LoadingWidget() : SizedBox();
-            }),
-        Transform.translate(
-          offset: Offset(
-              0,
-              MediaQuery.of(context).size.height +
-                  100 -
-                  (MediaQuery.of(context).size.height *
-                      _sheetController.value)),
-          child: CustomBottomSheet(
-            onTap: () => _sheetController.close(),
+        AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            "Notas",
+            style: TextStyle(color: fontColor(), fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: StaggeredGridView.countBuilder(
+            physics: BouncingScrollPhysics(),
+            crossAxisCount: 4,
+            itemCount: notes.length,
+            itemBuilder: (context, index) {
+              if (notes[index].type == TypeNote.Text)
+                return SimpleCard(notes[index]);
+              if (notes[index].type == TypeNote.Image)
+                return ImageCard(notes[index]);
+              if (notes[index].type == TypeNote.TextImage)
+                return TextImageCard(notes[index]);
+              return Container();
+            },
+            staggeredTileBuilder: (int index) => new StaggeredTile.count(2, 2),
+            mainAxisSpacing: 1.0,
+            crossAxisSpacing: 1.0,
           ),
         )
       ],
