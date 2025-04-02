@@ -1,3 +1,4 @@
+import 'package:app_notas/src/ui/pages/landing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
@@ -80,8 +81,8 @@ class ErrorPage extends StatelessWidget {
                     : Container(),
                 TextButton(
                   child: Text("Volver al inicio"),
-                  onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                      context, HomePage.HOME_PAGE_ROUTE, (route) => false),
+                  onPressed: () => Navigator.pushNamedAndRemoveUntil(context,
+                      LandingPage.LANDING_PAGE_ROUTE, (route) => false),
                 ),
               ],
             )
