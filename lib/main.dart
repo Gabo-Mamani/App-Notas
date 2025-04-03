@@ -3,6 +3,7 @@ import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/pages/landing_page.dart';
+import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -24,6 +25,7 @@ class MyApp extends StatelessWidget {
             HomePage.HOME_PAGE_ROUTE: (context) => HomePage(),
             ErrorPage.ERROR_PAGE_ROUTE: (context) => ErrorPage(),
             LandingPage.LANDING_PAGE_ROUTE: (context) => LandingPage(),
+            NotePage.NOTE_PAGE_ROUTE: (context) => NotePage(),
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,

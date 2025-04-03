@@ -35,4 +35,7 @@ class Constants {
 
   static const String errorMessage =
       "Parece que sucedió un problema, por favor notifica al creador para solventar el problema";
+
+  static const String defaultImage =
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Imagen_no_disponible.svg/480px-Imagen_no_disponible.svg.png";
 }

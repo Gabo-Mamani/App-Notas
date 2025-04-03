@@ -4,6 +4,7 @@ import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
+import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
@@ -76,18 +77,34 @@ class _Body extends StatelessWidget {
         Expanded(
           child: StaggeredGridView.countBuilder(
             physics: BouncingScrollPhysics(),
-            crossAxisCount: 4,
+            crossAxisCount: 2,
             itemCount: notes.length,
             itemBuilder: (context, index) {
               if (notes[index].type == TypeNote.Text)
-                return SimpleCard(notes[index]);
+                return SimpleCard(
+                  notes[index],
+                  onTap: () => Navigator.pushNamed(
+                      context, NotePage.NOTE_PAGE_ROUTE,
+                      arguments: NotePageArguments(note: notes[index])),
+                );
               if (notes[index].type == TypeNote.Image)
-                return ImageCard(notes[index]);
+                return ImageCard(
+                  notes[index],
+                  onTap: () => Navigator.pushNamed(
+                      context, NotePage.NOTE_PAGE_ROUTE,
+                      arguments: NotePageArguments(note: notes[index])),
+                );
               if (notes[index].type == TypeNote.TextImage)
-                return TextImageCard(notes[index]);
+                return TextImageCard(
+                  notes[index],
+                  onTap: () => Navigator.pushNamed(
+                      context, NotePage.NOTE_PAGE_ROUTE,
+                      arguments: NotePageArguments(note: notes[index])),
+                );
               return Container();
             },
-            staggeredTileBuilder: (int index) => new StaggeredTile.count(2, 2),
+            staggeredTileBuilder: (int index) =>
+                new StaggeredTile.count(1, index.isEven ? 1.3 : 1.9),
             mainAxisSpacing: 1.0,
             crossAxisSpacing: 1.0,
           ),
