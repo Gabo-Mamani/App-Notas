@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 class Configure {
   static const PRIMARY = Color(0xFFDBA67B);
   static const SECONDARY = Color(0xFF458985);
@@ -11,6 +12,6 @@ class Configure {
 
   static const PRIMARY_BUTTON_DARK = PRIMARY;
 
-  static const BACKGROUND_LIGHT = Color(0xFFDDDDDD);
+  static const BACKGROUND_LIGHT = Color(0xFFEEEEEE);
   static const BACKGROUND_DARK = Color(0xFF222222);
 }

@@ -4,6 +4,7 @@ import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/pages/landing_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
+import 'package:app_notas/src/ui/pages/private_notes.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -26,10 +27,12 @@ class MyApp extends StatelessWidget {
             ErrorPage.ERROR_PAGE_ROUTE: (context) => ErrorPage(),
             LandingPage.LANDING_PAGE_ROUTE: (context) => LandingPage(),
             NotePage.NOTE_PAGE_ROUTE: (context) => NotePage(),
+            NotePrivatePage.NOTE_PRIVATE_PAGE_ROUTE: (context) =>
+                NotePrivatePage(),
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,
-          initialRoute: HomePage.HOME_PAGE_ROUTE,
+          initialRoute: LandingPage.LANDING_PAGE_ROUTE,
           theme: ThemeData(
             fontFamily: 'Roboto',
           ),

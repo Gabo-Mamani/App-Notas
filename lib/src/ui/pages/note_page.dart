@@ -33,21 +33,29 @@ class NotePage extends StatelessWidget {
         ModalRoute.of(context)?.settings.arguments as NotePageArguments;
     final theme = ThemeController.instance;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: ThemeController.instance.primary(),
+        onPressed: () {},
+        child: Icon(Icons.edit),
+      ),
       backgroundColor: theme.background(),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-          onPressed: () {},
-        ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
-        title: Text(
-          _title(arguments.note!),
-          style: TextStyle(color: fontColor()),
-        ),
-      ),
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+            onPressed: () => Navigator.pop(context),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          centerTitle: true,
+          title: Text(
+            _title(arguments.note!),
+            style: TextStyle(color: fontColor()),
+          ),
+          actions: [
+            IconButton(
+                onPressed: () {}, icon: Icon(Icons.delete, color: fontColor()))
+          ]),
       body: _Body(arguments.note!),
     );
   }
