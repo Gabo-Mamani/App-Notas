@@ -5,12 +5,16 @@ class TextInput extends StatelessWidget {
   final String title;
   final bool private;
   final Function(String)? textEntry;
+  final Function()? action;
+  final IconData? icon;
 
   const TextInput(
       {Key? key,
       this.controller,
       this.title = "",
       this.textEntry,
+      this.action,
+      this.icon = Icons.check,
       this.private = false})
       : super(key: key);
 
@@ -27,12 +31,15 @@ class TextInput extends StatelessWidget {
             width: double.infinity,
             height: 50,
             decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(8)),
             child: TextField(
               obscureText: private,
               controller: controller,
               decoration: InputDecoration(
+                  suffixIcon: action != null
+                      ? IconButton(onPressed: action, icon: Icon(icon))
+                      : Container(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 8),
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -69,7 +76,7 @@ class LargeTextInput extends StatelessWidget {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(8)),
             child: TextField(
               maxLines: 6,

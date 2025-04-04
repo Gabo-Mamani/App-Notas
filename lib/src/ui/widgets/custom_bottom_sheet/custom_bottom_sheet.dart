@@ -48,26 +48,27 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     return Material(
       color: Colors.transparent,
       child: Container(
-          padding: EdgeInsets.all(16),
-          height: size.height - 100,
-          width: double.infinity,
-          decoration: BoxDecoration(
-              color: background(),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: GestureDetector(
-                  onTap: widget.close,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.close),
-                  ),
+        padding: EdgeInsets.all(16),
+        height: size.height - 100,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: background(),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: GestureDetector(
+                onTap: widget.close,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.close),
                 ),
               ),
-              Expanded(
-                  child: Column(
+            ),
+            Expanded(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Column(
@@ -108,16 +109,31 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                             context, NotePrivatePage.NOTE_PRIVATE_PAGE_ROUTE);
                         widget.close!();
                       } else {
-                        showSnackBar(homePageMessengerKey,
-                            "La Contraseña es incorrecta");
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Error"),
+                              content: Text("La Contraseña es incorrecta"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text("Aceptar"),
+                                )
+                              ],
+                            );
+                          },
+                        );
                       }
                     },
                     color: theme.primary(),
                   )
                 ],
-              ))
-            ],
-          )),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 

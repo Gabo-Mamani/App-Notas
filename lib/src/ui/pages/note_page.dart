@@ -93,6 +93,14 @@ class _Body extends StatelessWidget {
     });
   }
 
+  String parseDate() {
+    if (note.date != null) {
+      final _date = note.date?.split("-");
+      return "${_date?[0]} de ${Constants.nameMonth[int.parse(_date![1])]} del ${_date?[2]}";
+    }
+    return "";
+  }
+
   @override
   Widget build(BuildContext context) {
     urls(note.description ?? "");
@@ -102,10 +110,19 @@ class _Body extends StatelessWidget {
           _image(),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              note.description ?? "",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: fontColor()),
+            child: Column(
+              children: [
+                Text(
+                  note.description ?? "",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: fontColor()),
+                ),
+                Text(
+                  parseDate() ?? "",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: ThemeController.instance.primary()),
+                ),
+              ],
             ),
           ),
           Divider(),
