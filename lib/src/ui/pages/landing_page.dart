@@ -27,41 +27,44 @@ class LandingPage extends StatelessWidget {
     final theme = ThemeController.instance;
     return Stack(
       children: [
-        Scaffold(
-          backgroundColor: Colors.white,
-          body: SizedBox(
-              height: double.infinity,
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(child: _image()),
-                  Text(Constants.mainTitle,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)),
-                  SizedBox(height: 16),
-                  Text(
-                    Constants.subTitle,
-                    style: TextStyle(color: Colors.blueGrey),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 100),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: MediumButton(
-                        title: "Ingresar",
-                        onTap: () async {
-                          LoadingWidgetController.instance.loading();
-                          await initMethods();
-                          LoadingWidgetController.instance.close();
-                          Navigator.pushNamed(
-                              context, NotePrivatePage.NOTE_PRIVATE_PAGE_ROUTE);
-                        }),
-                  )
-                ],
-              )),
+        ScaffoldMessenger(
+          key: homePageMessengerKey,
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: SizedBox(
+                height: double.infinity,
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Flexible(child: _image()),
+                    Text(Constants.mainTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 16),
+                    Text(
+                      Constants.subTitle,
+                      style: TextStyle(color: Colors.blueGrey),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 100),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: MediumButton(
+                          title: "Ingresar",
+                          onTap: () async {
+                            LoadingWidgetController.instance.loading();
+                            await initMethods();
+                            LoadingWidgetController.instance.close();
+                            Navigator.pushNamed(
+                                context, HomePage.HOME_PAGE_ROUTE);
+                          }),
+                    )
+                  ],
+                )),
+          ),
         ),
         ValueListenableBuilder(
             valueListenable: LoadingWidgetController.instance.loadingNotifier,

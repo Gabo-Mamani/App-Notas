@@ -15,6 +15,7 @@ import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controlle
 import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/status_message/status_message.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,31 +28,65 @@ Color fontColor() {
   return ThemeController.instance.brightnessValue ? Colors.black : Colors.white;
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
   static const HOME_PAGE_ROUTE = "home_page";
 
   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  late CustomBottomSheetController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = CustomBottomSheetController(this)
+      ..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = ThemeController.instance;
+    final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: theme.background(),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-            onPressed: () => Navigator.pop(context)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: fontColor()),
-            onPressed: () {},
-          )
-        ],
-      ),
-      body: _Body(),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: theme.background(),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+                onPressed: () => Navigator.pop(context)),
+            actions: [
+              IconButton(
+                icon: Icon(CupertinoIcons.search, color: fontColor()),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: Icon(Icons.lock, color: fontColor()),
+                onPressed: () {
+                  _controller.open();
+                },
+              )
+            ],
+          ),
+          body: _Body(),
+        ),
+        Transform.translate(
+            offset: Offset(
+                0, size.height + 100 - (size.height * _controller.value)),
+            child: CustomBottomSheet(close: () {
+              _controller.close();
+            }))
+      ],
     );
   }
 }
