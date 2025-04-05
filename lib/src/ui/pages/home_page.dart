@@ -1,6 +1,7 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
@@ -55,34 +56,42 @@ class _HomePageState extends State<HomePage>
     final theme = ThemeController.instance;
     final size = MediaQuery.of(context).size;
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: theme.background(),
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-                onPressed: () => Navigator.pop(context)),
-            actions: [
-              IconButton(
-                icon: Icon(CupertinoIcons.search, color: fontColor()),
-                onPressed: () => Navigator.pushNamed(
-                    context, SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE),
-              ),
-            ],
+    return ScaffoldMessenger(
+      child: Stack(
+        children: [
+          Scaffold(
+            floatingActionButton: FloatingActionButton(
+              backgroundColor: theme.primary(),
+              child: Icon(Icons.add),
+              onPressed: () =>
+                  Navigator.pushNamed(context, AddNotePage.ADD_NOTE_PAGE_ROUTE),
+            ),
+            backgroundColor: theme.background(),
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              leading: IconButton(
+                  icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+                  onPressed: () => Navigator.pop(context)),
+              actions: [
+                IconButton(
+                  icon: Icon(CupertinoIcons.search, color: fontColor()),
+                  onPressed: () => Navigator.pushNamed(
+                      context, SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE),
+                ),
+              ],
+            ),
+            body: _Body(),
           ),
-          body: _Body(),
-        ),
-        Transform.translate(
-            offset: Offset(
-                0, size.height + 100 - (size.height * _controller.value)),
-            child: CustomBottomSheet(close: () {
-              _controller.close();
-            }))
-      ],
+          Transform.translate(
+              offset: Offset(
+                  0, size.height + 100 - (size.height * _controller.value)),
+              child: CustomBottomSheet(close: () {
+                _controller.close();
+              }))
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -35,7 +36,9 @@ class NotePage extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: ThemeController.instance.primary(),
-        onPressed: () {},
+        onPressed: () => Navigator.pushNamed(
+            context, AddNotePage.ADD_NOTE_PAGE_ROUTE,
+            arguments: AddNotePageArguments(note: arguments.note, edit: true)),
         child: Icon(Icons.edit),
       ),
       backgroundColor: theme.background(),

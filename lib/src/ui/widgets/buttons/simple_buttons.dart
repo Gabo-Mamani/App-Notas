@@ -15,12 +15,16 @@ class MediumButton extends StatelessWidget {
   }) : super(key: key);
 
   Color getColor() {
-    return this.primaryColor?ThemeController.instance.primaryButton():ThemeController.instance.secondaryButton();
+    return this.primaryColor
+        ? ThemeController.instance.primaryButton()
+        : ThemeController.instance.secondaryButton();
   }
 
   Color getColorText() {
-    return !ThemeController.instance.brightnessValue ? Colors.black:Colors.white;
-
+    if (!this.primaryColor) return Colors.black;
+    return !ThemeController.instance.brightnessValue
+        ? Colors.black
+        : Colors.white;
   }
 
   @override
@@ -31,18 +35,23 @@ class MediumButton extends StatelessWidget {
         width: 300,
         height: 50,
         decoration: BoxDecoration(
-          color: getColor(),
-          borderRadius: BorderRadius.circular(32)),
+            color: getColor(), borderRadius: BorderRadius.circular(32)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon != null ? Icon(icon) : SizedBox(),
+            icon != null
+                ? Icon(
+                    icon,
+                    color: getColorText(),
+                  )
+                : SizedBox(),
             SizedBox(width: icon != null ? 8 : 0),
             Text(
               title,
               style: TextStyle(color: getColorText(), fontSize: 16),
-              )
-          ],),
+            )
+          ],
+        ),
       ),
     );
   }

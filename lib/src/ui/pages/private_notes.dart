@@ -2,6 +2,7 @@ import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/ui/configure.dart';
+import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,13 @@ class NotePrivatePage extends StatelessWidget {
     final theme = ThemeController.instance;
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: theme.primary(),
+        child: Icon(Icons.add),
+        onPressed: () => Navigator.pushNamed(
+            context, AddNotePage.ADD_NOTE_PAGE_ROUTE,
+            arguments: AddNotePageArguments(private: true)),
+      ),
       backgroundColor: background(),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
