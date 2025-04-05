@@ -1,6 +1,7 @@
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet_controller.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet.dart';
@@ -110,7 +111,8 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                         SimpleTile(
                           title: "Recursos",
                           leading: Icons.image,
-                          onTap: () {},
+                          onTap: () => Navigator.popAndPushNamed(
+                              context, AddAttachmentPage.ADD_ATTACHMENT_PAGE),
                         )
                       ],
                     ),

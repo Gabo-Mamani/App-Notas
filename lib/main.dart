@@ -1,5 +1,6 @@
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
+import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
@@ -33,7 +34,9 @@ class MyApp extends StatelessWidget {
                 NotePrivatePage(),
             SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE: (context) =>
                 SearchNotesPage(),
-            AddNotePage.ADD_NOTE_PAGE_ROUTE: (context) => AddNotePage()
+            AddNotePage.ADD_NOTE_PAGE_ROUTE: (context) => AddNotePage(),
+            AddAttachmentPage.ADD_ATTACHMENT_PAGE: (context) =>
+                AddAttachmentPage()
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,

@@ -61,7 +61,6 @@ class _Body extends StatefulWidget {
 class __BodyState extends State<_Body> {
   late TextEditingController _title;
   late TextEditingController _description;
-  late TextEditingController _date;
 
   String? image;
 

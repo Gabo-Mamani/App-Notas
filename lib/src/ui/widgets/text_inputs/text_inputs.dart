@@ -39,8 +39,9 @@ class TextInput extends StatelessWidget {
               decoration: InputDecoration(
                   suffixIcon: action != null
                       ? IconButton(onPressed: action, icon: Icon(icon))
-                      : Container(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                      : SizedBox(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   errorBorder: InputBorder.none,

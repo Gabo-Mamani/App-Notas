@@ -38,4 +38,7 @@ class Constants {
 
   static const String defaultImage =
       "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Imagen_no_disponible.svg/480px-Imagen_no_disponible.svg.png";
+
+  static const String contentAttachment =
+      "Las fotos e imagenes que puedes agregar a tus notas, se muestran aquí";
 }
