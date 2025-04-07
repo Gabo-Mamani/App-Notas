@@ -5,6 +5,7 @@ import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
+import 'package:app_notas/src/ui/pages/trash_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
@@ -79,6 +80,11 @@ class _HomePageState extends State<HomePage>
                   icon: Icon(CupertinoIcons.search, color: fontColor()),
                   onPressed: () => Navigator.pushNamed(
                       context, SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE),
+                ),
+                IconButton(
+                  icon: Icon(CupertinoIcons.delete_simple, color: fontColor()),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, TrashPage.TRASH_PAGE_ROUTE),
                 ),
               ],
             ),
