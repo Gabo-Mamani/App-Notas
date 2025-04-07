@@ -21,7 +21,11 @@ class SimpleTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       title: Text(title, style: TextStyle(color: getColorText())),
-      leading: Icon(leading, color: getColorText()),
+      leading: leading != null
+          ? Icon(leading, color: getColorText())
+          : SizedBox(
+              height: 0,
+            ),
       trailing:
           trailing != null ? Icon(trailing, color: Colors.grey) : SizedBox(),
     );

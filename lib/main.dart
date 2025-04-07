@@ -3,6 +3,7 @@ import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
+import 'package:app_notas/src/ui/pages/export_notes_page.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/pages/landing_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
@@ -36,7 +37,9 @@ class MyApp extends StatelessWidget {
                 SearchNotesPage(),
             AddNotePage.ADD_NOTE_PAGE_ROUTE: (context) => AddNotePage(),
             AddAttachmentPage.ADD_ATTACHMENT_PAGE: (context) =>
-                AddAttachmentPage()
+                AddAttachmentPage(),
+            ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE: (context) =>
+                ExportNotesPage()
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,
