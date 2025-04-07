@@ -9,6 +9,7 @@ import 'package:app_notas/src/ui/pages/landing_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/private_notes.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
+import 'package:app_notas/src/ui/pages/task_list_page.dart';
 import 'package:app_notas/src/ui/pages/trash_page.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,8 @@ class MyApp extends StatelessWidget {
                 AddAttachmentPage(),
             ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE: (context) =>
                 ExportNotesPage(),
-            TrashPage.TRASH_PAGE_ROUTE: (context) => TrashPage()
+            TrashPage.TRASH_PAGE_ROUTE: (context) => TrashPage(),
+            TaskListPage.TASK_LIST_PAGE_ROUTE: (context) => TaskListPage()
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,
