@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 Color fontColor() {
   return ThemeController.instance.brightnessValue ? Colors.black : Colors.white;
@@ -65,6 +69,7 @@ class __BodyState extends State<_Body> {
   String? image;
 
   final Note note = Note();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -80,6 +85,7 @@ class __BodyState extends State<_Body> {
     super.initState();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -93,13 +99,31 @@ class __BodyState extends State<_Body> {
             title: "Descripción",
             controller: _description,
           ),
+          image != null
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(image!),
+                    leading: Icon(Icons.file_open_outlined),
+                  ),
+                )
+              : SizedBox(),
           Row(
             children: [
               Flexible(
                 child: MediumButton(
                   title: "Cámara",
                   icon: Icons.camera,
-                  onTap: () {},
+                  onTap: () async {
+                    try {
+                      final XFile? photo =
+                          await _picker.pickImage(source: ImageSource.camera);
+                      if (photo != null)
+                        setState(() {
+                          image = photo.path;
+                        });
+                    } catch (e) {}
+                  },
                 ),
               ),
               SizedBox(width: 8),
@@ -107,7 +131,19 @@ class __BodyState extends State<_Body> {
                 child: MediumButton(
                   title: "Galería",
                   icon: Icons.image,
-                  onTap: () {},
+                  onTap: () async {
+                    try {
+                      FilePickerResult? result =
+                          await FilePicker.platform.pickFiles();
+
+                      if (result != null) {
+                        File file = File(result.files.single.path!);
+                        setState(() {
+                          image = result.files.single.name;
+                        });
+                      }
+                    } catch (e) {}
+                  },
                   primaryColor: false,
                 ),
               ),
