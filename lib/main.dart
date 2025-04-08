@@ -6,6 +6,7 @@ import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/export_notes_page.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/pages/landing_page.dart';
+import 'package:app_notas/src/ui/pages/list_notes_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/private_notes.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
@@ -43,7 +44,9 @@ class MyApp extends StatelessWidget {
             ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE: (context) =>
                 ExportNotesPage(),
             TrashPage.TRASH_PAGE_ROUTE: (context) => TrashPage(),
-            TaskListPage.TASK_LIST_PAGE_ROUTE: (context) => TaskListPage()
+            TaskListPage.TASK_LIST_PAGE_ROUTE: (context) => TaskListPage(),
+            ListSimpleNotes.LIST_SIMPLE_NOTES_ROUTE: (context) =>
+                ListSimpleNotes()
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,

@@ -1,9 +1,16 @@
+import 'dart:ffi';
+import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
+import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NotePageArguments {
@@ -17,7 +24,8 @@ Color fontColor() {
 
 class NotePage extends StatelessWidget {
   final Note? note;
-  NotePage({Key? key, this.note}) : super(key: key);
+  final bool repaint;
+  NotePage({Key? key, this.note, this.repaint = false}) : super(key: key);
 
   static const NOTE_PAGE_ROUTE = "note_page";
 
@@ -64,10 +72,18 @@ class NotePage extends StatelessWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   final Note note;
+  _Body(this.note, {Key? key}) : super(key: key);
 
-  const _Body(this.note, {Key? key}) : super(key: key);
+  @override
+  __BodyState createState() => __BodyState();
+}
+
+class __BodyState extends State<_Body> {
+  final _repaintKey = GlobalKey();
+
+  Uint8List? listBytes;
 
   Widget _image() {
     if (note.type == TypeNote.Image ||
@@ -110,20 +126,28 @@ class _Body extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          _image(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          RepaintBoundary(
+            key: _repaintKey,
             child: Column(
               children: [
-                Text(
-                  note.description ?? "",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: fontColor()),
-                ),
-                Text(
-                  parseDate() ?? "",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ThemeController.instance.primary()),
+                _image(),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        note.description ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: fontColor()),
+                      ),
+                      Text(
+                        parseDate() ?? "",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: ThemeController.instance.primary()),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -146,7 +170,26 @@ class _Body extends StatelessWidget {
                         ?.copyWith(color: Colors.blue)),
               );
             },
-          ))
+          )),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 80.0),
+            child: MediumButton(
+              title: "Descargar",
+              onTap: () async {
+                final RenderRepaintBoundary render = _repaintKey.currentContext!
+                    .findRenderObject() as RenderRepaintBoundary;
+                final image = await render.toImage();
+                final bytes =
+                    await image.toByteData(format: ImageByteFormat.png);
+
+                listBytes = bytes!.buffer.asUint8List();
+                if (listBytes != null) {
+                  await FileServices.instance
+                      .saveBytes("Captura.png", listBytes!);
+                }
+              },
+            ),
+          )
         ],
       ),
     );
