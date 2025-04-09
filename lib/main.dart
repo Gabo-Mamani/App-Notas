@@ -13,11 +13,14 @@ import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
 import 'package:app_notas/src/ui/pages/task_list_page.dart';
 import 'package:app_notas/src/ui/pages/trash_page.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart' as fc;
 
-void main() {
+void main() async {
   ErrorWidget.builder =
       (FlutterErrorDetails details) => ErrorPage(details: details);
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await fc.Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

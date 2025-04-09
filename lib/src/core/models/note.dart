@@ -9,17 +9,18 @@ class Note {
   String? image;
   TypeNote type;
   StateNote state;
+  String? id;
 
-  Note({
-    this.title,
-    this.date,
-    this.description,
-    this.private = false,
-    this.urls,
-    this.image,
-    this.type = TypeNote.Text,
-    this.state = StateNote.Visible,
-  });
+  Note(
+      {this.title,
+      this.date,
+      this.description,
+      this.private = false,
+      this.urls,
+      this.image,
+      this.type = TypeNote.Text,
+      this.state = StateNote.Visible,
+      this.id});
 }
 
 Note note = Note(

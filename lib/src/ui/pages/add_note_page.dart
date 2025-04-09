@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:file_picker/file_picker.dart';
@@ -68,8 +69,15 @@ class __BodyState extends State<_Body> {
 
   String? image;
 
-  final Note note = Note();
+  Note note = Note();
   final ImagePicker _picker = ImagePicker();
+
+  FirebaseServices _services = FirebaseServices.instance;
+
+  String parseDate() {
+    final date = DateTime.now();
+    return "${date.day}-${date.month}-${date.year}";
+  }
 
   @override
   void initState() {
@@ -152,13 +160,44 @@ class __BodyState extends State<_Body> {
           Spacer(),
           MediumButton(
             title: "Guardar",
-            onTap: () {
+            onTap: () async {
               note.title = _title.value.text;
               note.description = _description.value.text;
               note.private = widget.arguments.private;
               if (image != null) {
                 note.image = image;
                 note.type = TypeNote.Image;
+              }
+
+              final Map<String, dynamic> response;
+              final Map<String, dynamic> values = {
+                "date": parseDate(),
+                "description": note.description,
+                "image": "",
+                "private": note.private,
+                "state": note.state.toString(),
+                "title": note.title,
+                "type": note.type.toString(),
+              };
+
+              if (widget.arguments.edit) {
+                response = await _services.update("notes", note.id!, values);
+              } else {
+                response = await _services.create("notes", values);
+              }
+
+              switch (response["status"]) {
+                case StatusNetwork.Connected:
+                  print("Se adicionó"); //cambiar a snackbar
+                  break;
+                case StatusNetwork.Exception:
+                  print("No se adicionó");
+                  break;
+                case StatusNetwork.NoInternet:
+                  print("No hay conexión a internet");
+                default:
+                  print("Ocurrió un error");
+                  break;
               }
             },
           )
