@@ -1,4 +1,9 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+StateTask convertState(String value) {
+  return StateTask.values.firstWhere((element) => element.toString() == value);
+}
 
 class Task {
   String? title;
@@ -6,14 +11,24 @@ class Task {
   String? description;
   List<String>? urls;
   StateTask state;
+  String? id;
 
-  Task({
-    this.title,
-    this.date,
-    this.description,
-    this.urls,
-    this.state = StateTask.Create,
-  });
+  Task(
+      {this.title,
+      this.date,
+      this.description,
+      this.urls,
+      this.state = StateTask.Create,
+      this.id});
+
+  factory Task.fromSnapshot(
+      QueryDocumentSnapshot<Map<String, dynamic>> snapshot, String id) {
+    return Task(
+        title: snapshot["title"],
+        description: snapshot["description"],
+        state: convertState(snapshot["state"]),
+        id: id);
+  }
 }
 
 Task task = Task(

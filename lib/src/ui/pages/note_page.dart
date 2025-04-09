@@ -7,6 +7,7 @@ import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/file_services.dart';
+import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,8 @@ class NotePage extends StatelessWidget {
   NotePage({Key? key, this.note, this.repaint = false}) : super(key: key);
 
   static const NOTE_PAGE_ROUTE = "note_page";
+
+  final FirebaseServices _services = FirebaseServices.instance;
 
   String _title(Note note) {
     if (note.title != null) {
@@ -65,7 +68,11 @@ class NotePage extends StatelessWidget {
           ),
           actions: [
             IconButton(
-                onPressed: () {}, icon: Icon(Icons.delete, color: fontColor()))
+                onPressed: () async {
+                  final response =
+                      await _services.delete("notes", arguments.note!.id!);
+                },
+                icon: Icon(Icons.delete, color: fontColor()))
           ]),
       body: _Body(arguments.note!),
     );

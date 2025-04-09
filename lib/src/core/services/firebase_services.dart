@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:app_notas/src/core/constants/parameters.dart';
+import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/models/task.dart' as task;
 import 'package:app_notas/src/core/services/interne_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart';
 
 class FirebaseServices extends InterneServices {
   FirebaseServices._();
@@ -14,7 +20,7 @@ class FirebaseServices extends InterneServices {
     Map<String, dynamic> dataResponse = {};
     if (await super.connected()) {
       try {
-        ref.collection(collection).add(data);
+        await ref.collection(collection).add(data);
         dataResponse["status"] = StatusNetwork.Connected;
       } catch (e) {
         dataResponse["status"] = StatusNetwork.Exception;
@@ -26,10 +32,27 @@ class FirebaseServices extends InterneServices {
   }
 
 //Método leer
-  Future<Map<String, dynamic>> read(String s) async {
+  Future<Map<String, dynamic>> read(String collection) async {
     Map<String, dynamic> dataResponse = {};
+    List<dynamic> elements = [];
     if (await super.connected()) {
       try {
+        final response = await ref.collection(collection).get();
+        for (int i = 0; i < response.docs.length; i++) {
+          switch (collection) {
+            case "notes":
+              elements.add(
+                  Note.fromSnapshot(response.docs[i], response.docs[0].id));
+              break;
+            case "task":
+              elements.add(task.Task.fromSnapshot(
+                  response.docs[i], response.docs[0].id));
+              break;
+            default:
+              break;
+          }
+        }
+        dataResponse["data"] = elements;
         dataResponse["status"] = StatusNetwork.Connected;
       } catch (e) {
         dataResponse["status"] = StatusNetwork.Exception;
@@ -46,7 +69,7 @@ class FirebaseServices extends InterneServices {
     Map<String, dynamic> dataResponse = {};
     if (await super.connected()) {
       try {
-        ref.collection(collection).doc(id).update(data);
+        await ref.collection(collection).doc(id).update(data);
         dataResponse["status"] = StatusNetwork.Connected;
       } catch (e) {
         dataResponse["status"] = StatusNetwork.Exception;
@@ -58,10 +81,11 @@ class FirebaseServices extends InterneServices {
   }
 
 //Método eliminar
-  Future<Map<String, dynamic>> delete() async {
+  Future<Map<String, dynamic>> delete(String collection, String id) async {
     Map<String, dynamic> dataResponse = {};
     if (await super.connected()) {
       try {
+        await ref.collection(collection).doc(id).delete();
         dataResponse["status"] = StatusNetwork.Connected;
       } catch (e) {
         dataResponse["status"] = StatusNetwork.Exception;

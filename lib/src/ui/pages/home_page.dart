@@ -1,6 +1,7 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
@@ -102,8 +103,17 @@ class _HomePageState extends State<HomePage>
   }
 }
 
-class _Body extends StatelessWidget {
-  const _Body({Key? key}) : super(key: key);
+class _Body extends StatefulWidget {
+  _Body({Key? key}) : super(key: key);
+
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  FirebaseServices _services = FirebaseServices.instance;
+
+  List<dynamic> notes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -119,40 +129,62 @@ class _Body extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: StaggeredGridView.countBuilder(
-            physics: BouncingScrollPhysics(),
-            crossAxisCount: 2,
-            itemCount: notes.length,
-            itemBuilder: (context, index) {
-              if (notes[index].type == TypeNote.Text)
-                return SimpleCard(
-                  notes[index],
-                  onTap: () => Navigator.pushNamed(
-                      context, NotePage.NOTE_PAGE_ROUTE,
-                      arguments: NotePageArguments(note: notes[index])),
-                );
-              if (notes[index].type == TypeNote.Image)
-                return ImageCard(
-                  notes[index],
-                  onTap: () => Navigator.pushNamed(
-                      context, NotePage.NOTE_PAGE_ROUTE,
-                      arguments: NotePageArguments(note: notes[index])),
-                );
-              if (notes[index].type == TypeNote.TextImage)
-                return TextImageCard(
-                  notes[index],
-                  onTap: () => Navigator.pushNamed(
-                      context, NotePage.NOTE_PAGE_ROUTE,
-                      arguments: NotePageArguments(note: notes[index])),
-                );
+            child: FutureBuilder(
+          future: _services.read("notes"),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return StatusMessage(() async {
+                await _services.read("notes");
+              }, StatusNetwork.Exception);
+            }
+            if (!snapshot.hasData) {
               return Container();
-            },
-            staggeredTileBuilder: (int index) =>
-                new StaggeredTile.count(1, index.isEven ? 1.3 : 1.9),
-            mainAxisSpacing: 1.0,
-            crossAxisSpacing: 1.0,
-          ),
-        )
+            } else {
+              Map<String, dynamic> response =
+                  snapshot.data as Map<String, dynamic>;
+              if (response["status"] == StatusNetwork.Connected) {
+                notes = response["data"];
+                return StaggeredGridView.countBuilder(
+                  physics: BouncingScrollPhysics(),
+                  crossAxisCount: 2,
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    if (notes[index].type == TypeNote.Text)
+                      return SimpleCard(
+                        notes[index],
+                        onTap: () => Navigator.pushNamed(
+                            context, NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: notes[index])),
+                      );
+                    if (notes[index].type == TypeNote.Image)
+                      return ImageCard(
+                        notes[index],
+                        onTap: () => Navigator.pushNamed(
+                            context, NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: notes[index])),
+                      );
+                    if (notes[index].type == TypeNote.TextImage)
+                      return TextImageCard(
+                        notes[index],
+                        onTap: () => Navigator.pushNamed(
+                            context, NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: notes[index])),
+                      );
+                    return Container();
+                  },
+                  staggeredTileBuilder: (int index) =>
+                      new StaggeredTile.count(1, index.isEven ? 1.3 : 1.9),
+                  mainAxisSpacing: 1.0,
+                  crossAxisSpacing: 1.0,
+                );
+              } else {
+                return StatusMessage(() async {
+                  await _services.read("notes");
+                }, StatusNetwork.Exception);
+              }
+            }
+          },
+        )),
       ],
     );
   }
