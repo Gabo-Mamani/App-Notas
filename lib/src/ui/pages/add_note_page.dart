@@ -41,7 +41,7 @@ class AddNotePage extends StatelessWidget {
       backgroundColor: theme.background(),
       appBar: AppBar(
         title: Text(
-          "Nueva Nota",
+          arguments.edit ? "Edición de nota" : "Nueva Nota",
           style: TextStyle(color: fontColor()),
         ),
         centerTitle: true,
@@ -191,7 +191,11 @@ class __BodyState extends State<_Body> {
 
               switch (response["status"]) {
                 case StatusNetwork.Connected:
-                  Navigator.pop(context, true);
+                  if (widget.arguments.edit) {
+                    Navigator.pop(context, "edit");
+                  } else {
+                    Navigator.pop(context, true);
+                  }
                   break;
 
                 case StatusNetwork.Exception:

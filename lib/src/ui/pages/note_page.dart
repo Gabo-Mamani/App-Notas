@@ -45,10 +45,21 @@ class NotePage extends StatelessWidget {
     final theme = ThemeController.instance;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: ThemeController.instance.primary(),
-        onPressed: () => Navigator.pushNamed(
-            context, AddNotePage.ADD_NOTE_PAGE_ROUTE,
-            arguments: AddNotePageArguments(note: arguments.note, edit: true)),
+        onPressed: () async {
+          final result = await Navigator.pushNamed(
+            context,
+            AddNotePage.ADD_NOTE_PAGE_ROUTE,
+            arguments: AddNotePageArguments(note: arguments.note, edit: true),
+          );
+
+          if (result == "edit") {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("¡Nota actualizada exitosamente!")),
+              );
+            });
+          }
+        },
         child: Icon(Icons.edit),
       ),
       backgroundColor: theme.background(),
@@ -70,7 +81,19 @@ class NotePage extends StatelessWidget {
                 onPressed: () async {
                   final response =
                       await _services.delete("notes", arguments.note!.id!);
-                  Navigator.pop(context);
+
+                  if (response["status"] == StatusNetwork.Connected) {
+                    Navigator.pop(context, true);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Nota eliminada exitosamente")),
+                      );
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error al eliminar la nota")),
+                    );
+                  }
                 },
                 icon: Icon(Icons.delete, color: fontColor()))
           ]),

@@ -159,25 +159,46 @@ class _BodyState extends State<_Body> {
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
                     if (notes[index].type == TypeNote.Text)
-                      return SimpleCard(
-                        notes[index],
-                        onTap: () => Navigator.pushNamed(
-                            context, NotePage.NOTE_PAGE_ROUTE,
-                            arguments: NotePageArguments(note: notes[index])),
-                      );
+                      return SimpleCard(notes[index], onTap: () async {
+                        final result = await Navigator.pushNamed(
+                          context,
+                          NotePage.NOTE_PAGE_ROUTE,
+                          arguments: NotePageArguments(note: notes[index]),
+                        );
+
+                        if (result == true) {
+                          setState(() {});
+                        }
+                      });
                     if (notes[index].type == TypeNote.Image)
                       return ImageCard(
                         notes[index],
-                        onTap: () => Navigator.pushNamed(
-                            context, NotePage.NOTE_PAGE_ROUTE,
-                            arguments: NotePageArguments(note: notes[index])),
+                        onTap: () async {
+                          final result = await Navigator.pushNamed(
+                            context,
+                            NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: notes[index]),
+                          );
+
+                          if (result == true) {
+                            setState(() {});
+                          }
+                        },
                       );
                     if (notes[index].type == TypeNote.TextImage)
                       return TextImageCard(
                         notes[index],
-                        onTap: () => Navigator.pushNamed(
-                            context, NotePage.NOTE_PAGE_ROUTE,
-                            arguments: NotePageArguments(note: notes[index])),
+                        onTap: () async {
+                          final result = await Navigator.pushNamed(
+                            context,
+                            NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: notes[index]),
+                          );
+
+                          if (result == true) {
+                            setState(() {});
+                          }
+                        },
                       );
                     return Container();
                   },
