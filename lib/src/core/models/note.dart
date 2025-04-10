@@ -37,6 +37,7 @@ class Note {
         image: snapshot["image"],
         title: snapshot["title"],
         description: snapshot["description"],
+        date: snapshot["date"],
         private: snapshot["private"],
         type: convertType(snapshot["type"]),
         state: convertState(snapshot["state"]),

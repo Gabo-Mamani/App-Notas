@@ -42,11 +42,11 @@ class FirebaseServices extends InterneServices {
           switch (collection) {
             case "notes":
               elements.add(
-                  Note.fromSnapshot(response.docs[i], response.docs[0].id));
+                  Note.fromSnapshot(response.docs[i], response.docs[i].id));
               break;
             case "task":
               elements.add(task.Task.fromSnapshot(
-                  response.docs[i], response.docs[0].id));
+                  response.docs[i], response.docs[i].id));
               break;
             default:
               break;

@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -71,6 +70,7 @@ class NotePage extends StatelessWidget {
                 onPressed: () async {
                   final response =
                       await _services.delete("notes", arguments.note!.id!);
+                  Navigator.pop(context);
                 },
                 icon: Icon(Icons.delete, color: fontColor()))
           ]),
@@ -87,118 +87,134 @@ class _Body extends StatefulWidget {
   __BodyState createState() => __BodyState();
 }
 
+// ... (todo el import y el resto del archivo sin cambios hasta __BodyState)
+
 class __BodyState extends State<_Body> {
   final _repaintKey = GlobalKey();
-
   Uint8List? listBytes;
 
   Widget _image() {
-    if (note.type == TypeNote.Image ||
-        note.type == TypeNote.ImagenNetwork ||
-        note.type == TypeNote.TextImage ||
-        note.type == TypeNote.TextImageNetwork) {
+    if (widget.note.type == TypeNote.Image ||
+        widget.note.type == TypeNote.ImagenNetwork ||
+        widget.note.type == TypeNote.TextImage ||
+        widget.note.type == TypeNote.TextImageNetwork) {
       return Container(
         height: 100,
         width: double.infinity,
         decoration: BoxDecoration(
-            image: DecorationImage(
-                image: NetworkImage(note.image ?? Constants.defaultImage),
-                fit: BoxFit.cover)),
+          image: DecorationImage(
+            image: NetworkImage(widget.note.image ?? Constants.defaultImage),
+            fit: BoxFit.cover,
+          ),
+        ),
       );
     }
     return Container();
   }
 
   void urls(String text) {
-    note.urls = [];
+    widget.note.urls = [];
     RegExp regexp =
         RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
     Iterable<RegExpMatch> match = regexp.allMatches(text);
     match.forEach((element) {
-      note.urls?.add(text.substring(element.start, element.end));
+      widget.note.urls?.add(text.substring(element.start, element.end));
     });
   }
 
   String parseDate() {
-    if (note.date != null) {
-      final _date = note.date?.split("-");
-      return "${_date?[0]} de ${Constants.nameMonth[int.parse(_date![1])]} del ${_date?[2]}";
+    try {
+      print("Fecha original: ${widget.note.date}"); // 🪵 log de depuración
+      final _date = widget.note.date?.split("-");
+      if (_date == null || _date.length != 3) return "";
+
+      final day = _date[0];
+      final month = int.parse(_date[1]);
+      final year = _date[2];
+
+      if (month >= 1 && month <= 12) {
+        return "$day de ${Constants.nameMonth[month]} del $year";
+      } else {
+        return widget.note.date ?? "";
+      }
+    } catch (e) {
+      print("Error parseando la fecha: $e");
+      return widget.note.date ?? "";
     }
-    return "";
   }
 
   @override
   Widget build(BuildContext context) {
-    urls(note.description ?? "");
-    return Container(
-      child: Column(
-        children: [
-          RepaintBoundary(
-            key: _repaintKey,
-            child: Column(
-              children: [
-                _image(),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        note.description ?? "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: fontColor()),
-                      ),
-                      Text(
-                        parseDate() ?? "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: ThemeController.instance.primary()),
-                      ),
-                    ],
-                  ),
+    urls(widget.note.description ?? "");
+    return Column(
+      children: [
+        RepaintBoundary(
+          key: _repaintKey,
+          child: Column(
+            children: [
+              _image(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      widget.note.description ?? "",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: fontColor()),
+                    ),
+                    Text(
+                      parseDate(),
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(color: ThemeController.instance.primary()),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Divider(),
-          Expanded(
-              child: ListView.builder(
+        ),
+        Divider(),
+        Expanded(
+          child: ListView.builder(
             physics: BouncingScrollPhysics(),
-            itemCount: note.urls!.length,
+            itemCount: widget.note.urls?.length ?? 0,
             itemBuilder: (context, index) {
-              final url = note.urls![index];
+              final url = widget.note.urls![index];
               return ListTile(
                 onTap: () {
                   launch(url);
                 },
-                title: Text(url,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.blue)),
+                title: Text(
+                  url,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Colors.blue),
+                ),
               );
             },
-          )),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 80.0),
-            child: MediumButton(
-              title: "Descargar",
-              onTap: () async {
-                final RenderRepaintBoundary render = _repaintKey.currentContext!
-                    .findRenderObject() as RenderRepaintBoundary;
-                final image = await render.toImage();
-                final bytes =
-                    await image.toByteData(format: ImageByteFormat.png);
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 80.0),
+          child: MediumButton(
+            title: "Descargar",
+            onTap: () async {
+              final RenderRepaintBoundary render = _repaintKey.currentContext!
+                  .findRenderObject() as RenderRepaintBoundary;
+              final image = await render.toImage();
+              final bytes = await image.toByteData(format: ImageByteFormat.png);
 
-                listBytes = bytes!.buffer.asUint8List();
-                if (listBytes != null) {
-                  await FileServices.instance
-                      .saveBytes("Captura.png", listBytes!);
-                }
-              },
-            ),
-          )
-        ],
-      ),
+              listBytes = bytes!.buffer.asUint8List();
+              if (listBytes != null) {
+                await FileServices.instance
+                    .saveBytes("Captura.png", listBytes!);
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }

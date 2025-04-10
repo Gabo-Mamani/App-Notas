@@ -85,6 +85,7 @@ class __BodyState extends State<_Body> {
       _title = TextEditingController(text: widget.arguments.note?.title ?? "");
       _description =
           TextEditingController(text: widget.arguments.note?.description ?? "");
+      note = widget.arguments.note!;
     } else {
       _title = TextEditingController(text: "");
       _description = TextEditingController(text: "");
