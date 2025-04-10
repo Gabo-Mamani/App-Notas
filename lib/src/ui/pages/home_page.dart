@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:app_notas/src/ui/widgets/cards/note_card.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();
 GlobalKey<ScaffoldMessengerState> homePageMessengerKey =
@@ -97,6 +98,14 @@ class _HomePageState extends State<HomePage>
                 onPressed: () =>
                     Navigator.pushNamed(context, TrashPage.TRASH_PAGE_ROUTE),
               ),
+              IconButton(
+                icon: Icon(Icons.brightness_6, color: fontColor()),
+                tooltip: "Cambiar tema",
+                onPressed: () {
+                  ThemeController.instance.changeTheme();
+                  setState(() {});
+                },
+              ),
             ],
           ),
           body: _Body(),
@@ -158,8 +167,9 @@ class _BodyState extends State<_Body> {
                   crossAxisCount: 2,
                   itemCount: notes.length,
                   itemBuilder: (context, index) {
-                    if (notes[index].type == TypeNote.Text)
-                      return SimpleCard(notes[index], onTap: () async {
+                    return NoteCard(
+                      notes[index],
+                      onTap: () async {
                         final result = await Navigator.pushNamed(
                           context,
                           NotePage.NOTE_PAGE_ROUTE,
@@ -169,38 +179,8 @@ class _BodyState extends State<_Body> {
                         if (result == true) {
                           setState(() {});
                         }
-                      });
-                    if (notes[index].type == TypeNote.Image)
-                      return ImageCard(
-                        notes[index],
-                        onTap: () async {
-                          final result = await Navigator.pushNamed(
-                            context,
-                            NotePage.NOTE_PAGE_ROUTE,
-                            arguments: NotePageArguments(note: notes[index]),
-                          );
-
-                          if (result == true) {
-                            setState(() {});
-                          }
-                        },
-                      );
-                    if (notes[index].type == TypeNote.TextImage)
-                      return TextImageCard(
-                        notes[index],
-                        onTap: () async {
-                          final result = await Navigator.pushNamed(
-                            context,
-                            NotePage.NOTE_PAGE_ROUTE,
-                            arguments: NotePageArguments(note: notes[index]),
-                          );
-
-                          if (result == true) {
-                            setState(() {});
-                          }
-                        },
-                      );
-                    return Container();
+                      },
+                    );
                   },
                   staggeredTileBuilder: (int index) =>
                       new StaggeredTile.count(1, index.isEven ? 1.3 : 1.9),

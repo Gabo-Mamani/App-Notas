@@ -1,6 +1,8 @@
 import 'package:app_notas/src/core/constants/data.dart';
+import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/export_notes_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
@@ -98,7 +100,7 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                         SimpleTile(
                           title: "Notas compratidas",
                           leading: Icons.share,
-                          onTap: () => Navigator.popAndPushNamed(
+                          onTap: () => Navigator.pushNamed(
                               context, ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE),
                         ),
                         SimpleTile(
@@ -115,7 +117,7 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                         SimpleTile(
                           title: "Recursos",
                           leading: Icons.image,
-                          onTap: () => Navigator.popAndPushNamed(
+                          onTap: () => Navigator.pushNamed(
                               context, AddAttachmentPage.ADD_ATTACHMENT_PAGE),
                         )
                       ],
@@ -130,18 +132,47 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                             color: fontColor(), fontWeight: FontWeight.bold),
                       ),
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: 3,
-                      itemBuilder: (context, index) {
-                        return ImageTile(
-                          onTap: () => Navigator.pushNamed(
-                              context, NotePage.NOTE_PAGE_ROUTE,
-                              arguments: NotePageArguments(note: notes[index])),
-                          title: notes[index].title ?? "",
-                          description: notes[index].description ?? "",
-                          image: notes[index].image ?? Constants.defaultImage,
-                          date: notes[index].date ?? "",
+                    FutureBuilder(
+                      future: FirebaseServices.instance.read("notes"),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+
+                        if (!snapshot.hasData || snapshot.hasError) {
+                          return Text(
+                              "No se pudieron cargar las notas recientes");
+                        }
+
+                        final response = snapshot.data as Map<String, dynamic>;
+                        if (response["status"] != StatusNetwork.Connected) {
+                          return Text("No hay conexión");
+                        }
+
+                        List<dynamic> recentNotes = response["data"];
+                        recentNotes.sort((a, b) =>
+                            b.date.compareTo(a.date)); // Orden descendente
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount:
+                              recentNotes.length < 3 ? recentNotes.length : 3,
+                          itemBuilder: (context, index) {
+                            final note = recentNotes[index];
+                            return ImageTile(
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                NotePage.NOTE_PAGE_ROUTE,
+                                arguments: NotePageArguments(note: note),
+                              ),
+                              title: note.title ?? "",
+                              description: note.description ?? "",
+                              image: note.image ?? Constants.defaultImage,
+                              date: note.date ?? "",
+                            );
+                          },
                         );
                       },
                     )

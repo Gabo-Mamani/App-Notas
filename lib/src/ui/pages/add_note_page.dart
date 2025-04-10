@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
@@ -149,11 +150,20 @@ class __BodyState extends State<_Body> {
 
                       if (result != null) {
                         File file = File(result.files.single.path!);
-                        setState(() {
-                          image = result.files.single.name;
-                        });
+
+                        // Guardamos el archivo localmente
+                        File? savedFile = await FileServices.instance.saveBytes(
+                            result.files.single.name, await file.readAsBytes());
+
+                        if (savedFile != null) {
+                          setState(() {
+                            image = savedFile.path; // Guardamos la ruta local
+                          });
+                        }
                       }
-                    } catch (e) {}
+                    } catch (e) {
+                      print("Error al guardar imagen local: $e");
+                    }
                   },
                   primaryColor: false,
                 ),
@@ -176,7 +186,7 @@ class __BodyState extends State<_Body> {
               final Map<String, dynamic> values = {
                 "date": parseDate(),
                 "description": note.description,
-                "image": "",
+                "image": note.image ?? "",
                 "private": note.private,
                 "state": note.state.toString(),
                 "title": note.title,

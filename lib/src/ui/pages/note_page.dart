@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -110,8 +111,6 @@ class _Body extends StatefulWidget {
   __BodyState createState() => __BodyState();
 }
 
-// ... (todo el import y el resto del archivo sin cambios hasta __BodyState)
-
 class __BodyState extends State<_Body> {
   final _repaintKey = GlobalKey();
   Uint8List? listBytes;
@@ -126,7 +125,7 @@ class __BodyState extends State<_Body> {
         width: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: NetworkImage(widget.note.image ?? Constants.defaultImage),
+            image: FileImage(File(widget.note.image!)),
             fit: BoxFit.cover,
           ),
         ),
@@ -147,7 +146,7 @@ class __BodyState extends State<_Body> {
 
   String parseDate() {
     try {
-      print("Fecha original: ${widget.note.date}"); // 🪵 log de depuración
+      print("Fecha original: ${widget.note.date}");
       final _date = widget.note.date?.split("-");
       if (_date == null || _date.length != 3) return "";
 

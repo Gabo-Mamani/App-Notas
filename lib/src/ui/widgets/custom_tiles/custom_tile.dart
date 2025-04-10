@@ -63,8 +63,12 @@ class ImageTile extends StatelessWidget {
         height: 85,
         width: 50,
         decoration: BoxDecoration(
-            image:
-                DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
+            image: DecorationImage(
+              image: image.startsWith('http')
+                  ? NetworkImage(image)
+                  : AssetImage("assets/default_note.png"),
+              fit: BoxFit.cover,
+            ),
             borderRadius: BorderRadius.circular(8)),
       ),
       subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
