@@ -1,6 +1,5 @@
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -43,7 +42,6 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(

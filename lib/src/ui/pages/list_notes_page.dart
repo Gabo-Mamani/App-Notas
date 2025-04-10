@@ -1,6 +1,5 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';

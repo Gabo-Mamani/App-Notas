@@ -1,28 +1,16 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
-import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
 import 'package:app_notas/src/ui/pages/trash_page.dart';
-import 'package:app_notas/src/ui/widgets/buttons/card_button.dart';
-import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
-import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet_controller.dart';
-import 'package:app_notas/src/ui/widgets/custom_tiles/check_tile.dart';
-import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
-import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
-import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controller.dart';
-import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/status_message/status_message.dart';
-import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:app_notas/src/ui/widgets/cards/note_card.dart';
 
 GlobalKey<ScaffoldState> homePageKey = GlobalKey<ScaffoldState>();

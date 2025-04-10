@@ -1,6 +1,4 @@
-import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/ui/pages/list_notes_page.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:flutter/material.dart';

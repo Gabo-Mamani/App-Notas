@@ -1,12 +1,6 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:app_notas/src/core/constants/data.dart';
-import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/models/note.dart';
-import 'package:app_notas/src/ui/configure.dart';
-import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart' as pp;

@@ -1,6 +1,5 @@
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/ui/pages/home_page.dart';
-import 'package:app_notas/src/ui/pages/private_notes.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controller.dart';
@@ -18,9 +17,7 @@ class LandingPage extends StatelessWidget {
             image: DecorationImage(image: AssetImage("assets/landing.png"))));
   }
 
-  Future<void> initMethods() async {
-    //iniciar métodos/servicios
-  }
+  Future<void> initMethods() async {}
 
   @override
   Widget build(BuildContext context) {

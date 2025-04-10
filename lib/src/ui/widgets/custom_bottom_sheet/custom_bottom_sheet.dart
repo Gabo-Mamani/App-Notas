@@ -1,9 +1,7 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/services/preferences_service.dart';
 import 'package:app_notas/src/ui/configure.dart';
-import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/pages/private_notes.dart';
-import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

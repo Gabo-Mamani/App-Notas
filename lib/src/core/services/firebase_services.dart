@@ -1,12 +1,8 @@
-import 'dart:io';
-
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/models/task.dart' as task;
 import 'package:app_notas/src/core/services/interne_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:http/http.dart';
 
 class FirebaseServices extends InterneServices {
   FirebaseServices._();
