@@ -4,17 +4,22 @@ import 'package:flutter/material.dart';
 class CheckTile extends StatefulWidget {
   final String title;
   final String subtitle;
+  final String? date;
   bool? PastDate;
   bool? activate;
   final Function(bool)? onChanged;
-  CheckTile(
-      {Key? key,
-      this.title = "",
-      this.activate = false,
-      this.onChanged,
-      this.PastDate = false,
-      this.subtitle = ""})
-      : super(key: key);
+  final Widget? trailing;
+
+  CheckTile({
+    Key? key,
+    this.title = "",
+    this.subtitle = "",
+    this.date,
+    this.PastDate = false,
+    this.activate = false,
+    this.onChanged,
+    this.trailing,
+  }) : super(key: key);
 
   @override
   State<CheckTile> createState() => _CheckTileState();
@@ -38,22 +43,22 @@ class _CheckTileState extends State<CheckTile> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Checkbox(
-              checkColor: getColorText(),
-              activeColor: ThemeController.instance.background(),
-              value: widget.activate,
-              onChanged: (value) {
-                setState(() {
-                  widget.activate = value;
-                });
-              }),
+            checkColor: getColorText(),
+            activeColor: ThemeController.instance.background(),
+            value: widget.activate,
+            onChanged: (value) {
+              setState(() {
+                widget.activate = value;
+              });
+              if (widget.onChanged != null) widget.onChanged!(value!);
+            },
+          ),
           SizedBox(width: 8),
           Expanded(
-            child: Container(
-                child: Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -65,15 +70,24 @@ class _CheckTileState extends State<CheckTile> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(color: getColorText(), fontSize: 12),
                 ),
-                widget.PastDate!
-                    ? Text(
-                        "La fecha de la tarea expiró",
-                        style: TextStyle(color: Colors.red, fontSize: 12),
-                      )
-                    : SizedBox(),
+                if (widget.date != null)
+                  Text(
+                    "Fecha límite: ${widget.date}",
+                    style: TextStyle(
+                      color: widget.PastDate == true
+                          ? Colors.red
+                          : Colors.grey.shade500,
+                      fontSize: 12,
+                    ),
+                  ),
               ],
-            )),
+            ),
           ),
+          if (widget.trailing != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: widget.trailing!,
+            ),
         ],
       ),
     );

@@ -27,6 +27,7 @@ class Task {
         title: snapshot["title"],
         description: snapshot["description"],
         state: convertState(snapshot["state"]),
+        date: snapshot["date"],
         id: id);
   }
 }
