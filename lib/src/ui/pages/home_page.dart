@@ -12,7 +12,7 @@ import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
 import 'package:app_notas/src/ui/widgets/cards/custom_cards.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet.dart';
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet_controller.dart';
-import 'package:app_notas/src/ui/widgets/custom_tiles/chek_tile.dart';
+import 'package:app_notas/src/ui/widgets/custom_tiles/check_tile.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget.dart';
 import 'package:app_notas/src/ui/widgets/loading_widget/loading_widget_controller.dart';
@@ -58,47 +58,56 @@ class _HomePageState extends State<HomePage>
     final theme = ThemeController.instance;
     final size = MediaQuery.of(context).size;
 
-    return ScaffoldMessenger(
-      child: Stack(
-        children: [
-          Scaffold(
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: theme.primary(),
-              child: Icon(Icons.add),
-              onPressed: () =>
-                  Navigator.pushNamed(context, AddNotePage.ADD_NOTE_PAGE_ROUTE),
-            ),
-            backgroundColor: theme.background(),
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              leading: IconButton(
-                  icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-                  onPressed: () => Navigator.pop(context)),
-              actions: [
-                IconButton(
-                  icon: Icon(CupertinoIcons.search, color: fontColor()),
-                  onPressed: () => Navigator.pushNamed(
-                      context, SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE),
-                ),
-                IconButton(
-                  icon: Icon(CupertinoIcons.delete_simple, color: fontColor()),
-                  onPressed: () =>
-                      Navigator.pushNamed(context, TrashPage.TRASH_PAGE_ROUTE),
-                ),
-              ],
-            ),
-            body: _Body(),
+    return Stack(
+      children: [
+        Scaffold(
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: theme.primary(),
+            child: Icon(Icons.add),
+            onPressed: () async {
+              final result = await Navigator.pushNamed(
+                context,
+                AddNotePage.ADD_NOTE_PAGE_ROUTE,
+              );
+              if (result == true) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("¡Nota guardada exitosamente!")),
+                  );
+                });
+              }
+            },
           ),
-          Transform.translate(
-              offset: Offset(
-                  0, size.height + 100 - (size.height * _controller.value)),
-              child: CustomBottomSheet(close: () {
-                _controller.close();
-              }))
-        ],
-      ),
+          backgroundColor: theme.background(),
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+                onPressed: () => Navigator.pop(context)),
+            actions: [
+              IconButton(
+                icon: Icon(CupertinoIcons.search, color: fontColor()),
+                onPressed: () => Navigator.pushNamed(
+                    context, SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE),
+              ),
+              IconButton(
+                icon: Icon(CupertinoIcons.delete_simple, color: fontColor()),
+                onPressed: () =>
+                    Navigator.pushNamed(context, TrashPage.TRASH_PAGE_ROUTE),
+              ),
+            ],
+          ),
+          body: _Body(),
+        ),
+        Transform.translate(
+            offset: Offset(
+                0, size.height + 100 - (size.height * _controller.value)),
+            child: CustomBottomSheet(close: () {
+              _controller.close();
+            }))
+      ],
     );
   }
 }

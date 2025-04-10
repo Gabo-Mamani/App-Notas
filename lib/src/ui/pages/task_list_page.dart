@@ -1,7 +1,7 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/task.dart';
-import 'package:app_notas/src/ui/widgets/custom_tiles/chek_tile.dart';
+import 'package:app_notas/src/ui/widgets/custom_tiles/check_tile.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:flutter/material.dart';
 

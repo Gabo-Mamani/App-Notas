@@ -4,7 +4,9 @@ import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
+import 'package:app_notas/src/ui/pages/home_page.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
+import 'package:app_notas/src/ui/widgets/snackbars/custom_snackbars.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -189,15 +191,17 @@ class __BodyState extends State<_Body> {
 
               switch (response["status"]) {
                 case StatusNetwork.Connected:
-                  print("Se adicionó"); //cambiar a snackbar
+                  Navigator.pop(context, true);
                   break;
+
                 case StatusNetwork.Exception:
-                  print("No se adicionó");
+                  print("No se guardó");
                   break;
                 case StatusNetwork.NoInternet:
-                  print("No hay conexión a internet");
+                  print("No hay conexión");
+                  break;
                 default:
-                  print("Ocurrió un error");
+                  print("Error desconocido");
                   break;
               }
             },
