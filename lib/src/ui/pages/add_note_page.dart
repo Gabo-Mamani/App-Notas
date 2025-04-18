@@ -149,13 +149,12 @@ class __BodyState extends State<_Body> {
                       if (result != null) {
                         File file = File(result.files.single.path!);
 
-                        // Guardamos el archivo localmente
                         File? savedFile = await FileServices.instance.saveBytes(
                             result.files.single.name, await file.readAsBytes());
 
                         if (savedFile != null) {
                           setState(() {
-                            image = savedFile.path; // Guardamos la ruta local
+                            image = savedFile.path;
                           });
                         }
                       }
@@ -194,6 +193,20 @@ class __BodyState extends State<_Body> {
               if (widget.arguments.edit) {
                 response = await _services.update("notes", note.id!, values);
               } else {
+                final existingNotes =
+                    await FirebaseServices.instance.read("notes");
+
+                if (existingNotes["status"] == StatusNetwork.Connected) {
+                  final List<dynamic> allNotes = existingNotes["data"];
+                  for (int i = 0; i < allNotes.length; i++) {
+                    final note = allNotes[i];
+                    await FirebaseServices.instance.update("notes", note.id!, {
+                      "order": (note.order ?? i) + 1,
+                    });
+                  }
+                }
+
+                values["order"] = 0;
                 response = await _services.create("notes", values);
               }
 

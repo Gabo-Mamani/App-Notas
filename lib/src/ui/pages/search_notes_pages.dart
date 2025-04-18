@@ -1,7 +1,6 @@
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/export_notes_page.dart';
@@ -11,34 +10,29 @@ import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet
 import 'package:app_notas/src/ui/widgets/custom_bottom_sheet/custom_bottom_sheet.dart';
 import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
 import 'package:app_notas/src/ui/widgets/text_inputs/text_inputs.dart';
-
 import 'package:flutter/material.dart';
 
-Color fontColor() {
-  return ThemeController.instance.brightnessValue ? Colors.black : Colors.white;
-}
-
-GlobalKey<ScaffoldState> searchNotesPageKey = GlobalKey<ScaffoldState>();
+Color fontColor() =>
+    ThemeController.instance.brightnessValue ? Colors.black : Colors.white;
 
 class SearchNotesPage extends StatelessWidget {
   const SearchNotesPage({Key? key}) : super(key: key);
-
   static final SEARCH_NOTES_PAGE_ROUTE = "search_notes_page";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: ThemeController.instance.background(),
-        key: searchNotesPageKey,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-              onPressed: () => Navigator.pop(context)),
-        ),
-        body: _Body());
+      backgroundColor: ThemeController.instance.background(),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+            onPressed: () => Navigator.pop(context)),
+      ),
+      body: _Body(),
+    );
   }
 }
 
@@ -53,14 +47,43 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
   late CustomBottomSheetController _controller;
   late TextEditingController _textController;
 
+  List<dynamic> allNotes = [];
+  List<dynamic> filteredNotes = [];
+
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: "");
     _controller = CustomBottomSheetController(this)
-      ..addListener(() {
-        setState(() {});
+      ..addListener(() => setState(() {}));
+    _textController.addListener(_filterNotes);
+    _loadNotes();
+  }
+
+  void _loadNotes() async {
+    final response = await FirebaseServices.instance.read("notes");
+    if (response["status"] == StatusNetwork.Connected) {
+      setState(() {
+        final all = (response["data"] as List).cast<dynamic>();
+        allNotes = all.where((note) => note.private != true).toList();
       });
+    }
+  }
+
+  void _filterNotes() {
+    final query = _textController.text.toLowerCase();
+    if (query.length >= 3) {
+      setState(() {
+        filteredNotes = allNotes.where((note) {
+          final title = note.title?.toLowerCase() ?? "";
+          return title.contains(query);
+        }).toList();
+      });
+    } else {
+      setState(() {
+        filteredNotes = [];
+      });
+    }
   }
 
   @override
@@ -68,8 +91,7 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
     final size = MediaQuery.of(context).size;
     return Stack(
       children: [
-        Container(
-            child: Column(
+        Column(
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 32),
@@ -81,56 +103,80 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Column(
-                  children: [
+                child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  if (filteredNotes.isNotEmpty) ...[
                     AppBar(
                       automaticallyImplyLeading: false,
                       backgroundColor: Colors.transparent,
                       elevation: 0,
-                      title: Text(
-                        "Sugerencias",
-                        style: TextStyle(
-                            color: fontColor(), fontWeight: FontWeight.bold),
-                      ),
+                      title: Text("Resultados",
+                          style: TextStyle(
+                              color: fontColor(), fontWeight: FontWeight.bold)),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: filteredNotes.length,
+                      itemBuilder: (context, index) {
+                        final note = filteredNotes[index];
+                        return ImageTile(
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            NotePage.NOTE_PAGE_ROUTE,
+                            arguments: NotePageArguments(note: note),
+                          ),
+                          title: note.title ?? "",
+                          description: note.description ?? "",
+                          image: (note.image != null &&
+                                  note.image!.trim().isNotEmpty)
+                              ? note.image!
+                              : Constants.defaultImage,
+                          date: note.date ?? "",
+                        );
+                      },
+                    ),
+                  ] else ...[
+                    AppBar(
+                      automaticallyImplyLeading: false,
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      title: Text("Sugerencias",
+                          style: TextStyle(
+                              color: fontColor(), fontWeight: FontWeight.bold)),
                     ),
                     Column(
                       children: [
                         SimpleTile(
-                          title: "Notas compratidas",
-                          leading: Icons.share,
-                          onTap: () => Navigator.pushNamed(
-                              context, ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE),
-                        ),
+                            title: "Notas compartidas",
+                            leading: Icons.share,
+                            onTap: () => Navigator.pushNamed(context,
+                                ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE)),
                         SimpleTile(
-                          title: "Tareas",
-                          leading: Icons.task,
-                          onTap: () => Navigator.pushNamed(
-                              context, TaskListPage.TASK_LIST_PAGE_ROUTE),
-                        ),
+                            title: "Tareas",
+                            leading: Icons.task,
+                            onTap: () => Navigator.pushNamed(
+                                context, TaskListPage.TASK_LIST_PAGE_ROUTE)),
                         SimpleTile(
-                          title: "Notas privadas",
-                          leading: Icons.lock,
-                          onTap: () => _controller.open(),
-                        ),
+                            title: "Notas privadas",
+                            leading: Icons.lock,
+                            onTap: () => _controller.open()),
                         SimpleTile(
-                          title: "Recursos",
-                          leading: Icons.image,
-                          onTap: () => Navigator.pushNamed(
-                              context, AddAttachmentPage.ADD_ATTACHMENT_PAGE),
-                        )
+                            title: "Recursos",
+                            leading: Icons.image,
+                            onTap: () => Navigator.pushNamed(context,
+                                AddAttachmentPage.ADD_ATTACHMENT_PAGE)),
                       ],
                     ),
                     AppBar(
                       automaticallyImplyLeading: false,
                       backgroundColor: Colors.transparent,
                       elevation: 0,
-                      title: Text(
-                        "Recientes",
-                        style: TextStyle(
-                            color: fontColor(), fontWeight: FontWeight.bold),
-                      ),
+                      title: Text("Recientes",
+                          style: TextStyle(
+                              color: fontColor(), fontWeight: FontWeight.bold)),
                     ),
                     FutureBuilder(
                       future: FirebaseServices.instance.read("notes"),
@@ -151,16 +197,20 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                         }
 
                         List<dynamic> recentNotes = response["data"];
-                        recentNotes.sort((a, b) =>
-                            b.date.compareTo(a.date)); // Orden descendente
+                        recentNotes = recentNotes
+                            .where((note) => note.private != true)
+                            .toList();
+
+                        recentNotes.sort(
+                            (a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+                        final first3 = recentNotes.take(3).toList();
 
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount:
-                              recentNotes.length < 3 ? recentNotes.length : 3,
+                          itemCount: first3.length,
                           itemBuilder: (context, index) {
-                            final note = recentNotes[index];
+                            final note = first3[index];
                             return ImageTile(
                               onTap: () => Navigator.pushNamed(
                                 context,
@@ -169,25 +219,27 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                               ),
                               title: note.title ?? "",
                               description: note.description ?? "",
-                              image: note.image ?? Constants.defaultImage,
+                              image: (note.image != null &&
+                                      note.image!.trim().isNotEmpty)
+                                  ? note.image!
+                                  : Constants.defaultImage,
                               date: note.date ?? "",
                             );
                           },
                         );
                       },
-                    )
-                  ],
-                ),
+                    ),
+                  ]
+                ],
               ),
-            )
+            )),
           ],
-        )),
+        ),
         Transform.translate(
-            offset:
-                Offset(0, size.height + 20 - (size.height * _controller.value)),
-            child: CustomBottomSheet(close: () {
-              _controller.close();
-            }))
+          offset:
+              Offset(0, size.height + 20 - (size.height * _controller.value)),
+          child: CustomBottomSheet(close: () => _controller.close()),
+        )
       ],
     );
   }

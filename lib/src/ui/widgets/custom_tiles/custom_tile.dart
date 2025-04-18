@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -45,17 +47,20 @@ class ImageTile extends StatelessWidget {
         : Colors.white;
   }
 
-  ImageTile(
-      {Key? key,
-      this.title = "",
-      this.date,
-      this.image =
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Imagen_no_disponible.svg/480px-Imagen_no_disponible.svg.png",
-      this.description = "",
-      this.onTap})
-      : super(key: key);
+  const ImageTile({
+    Key? key,
+    this.title = "",
+    this.date,
+    this.image = "",
+    this.description = "",
+    this.onTap,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
+    final bool showDefaultImage =
+        image.trim().isEmpty || !File(image).existsSync();
+
     return ListTile(
       onTap: onTap,
       title: Text(title, style: TextStyle(color: getColorText())),
@@ -63,25 +68,32 @@ class ImageTile extends StatelessWidget {
         height: 85,
         width: 50,
         decoration: BoxDecoration(
-            image: DecorationImage(
-              image: image.startsWith('http')
-                  ? NetworkImage(image)
-                  : AssetImage("assets/default_note.png"),
-              fit: BoxFit.cover,
-            ),
-            borderRadius: BorderRadius.circular(8)),
-      ),
-      subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(
-          description,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.blueGrey),
+          image: DecorationImage(
+            image: showDefaultImage
+                ? AssetImage("assets/default_note.png") as ImageProvider
+                : FileImage(File(image)),
+            fit: BoxFit.cover,
+          ),
+          borderRadius: BorderRadius.circular(8),
         ),
-        Text(date ?? "",
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            description,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Colors.blueGrey),
+          ),
+          Text(
+            date ?? "",
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: ThemeController.instance.primary(),
-                fontWeight: FontWeight.bold))
-      ]),
+                  color: ThemeController.instance.primary(),
+                  fontWeight: FontWeight.bold,
+                ),
+          )
+        ],
+      ),
     );
   }
 }

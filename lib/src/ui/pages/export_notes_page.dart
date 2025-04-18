@@ -101,7 +101,7 @@ class _Body extends StatelessWidget {
                     Flexible(flex: 1, child: _card("Notas", Icons.note, () {})),
                     Flexible(
                         flex: 1,
-                        child: _card("Imagem", Icons.image_outlined, () {})),
+                        child: _card("Imagen", Icons.image_outlined, () {})),
                   ],
                 ),
               ),

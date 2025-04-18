@@ -36,7 +36,7 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
-  List<Note> notes = [note1];
+  List<Note> notes = [];
 
   @override
   Widget build(BuildContext context) {
