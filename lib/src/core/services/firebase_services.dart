@@ -1,10 +1,10 @@
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/models/task.dart' as task;
-import 'package:app_notas/src/core/services/interne_services.dart';
+import 'package:app_notas/src/core/services/internet_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class FirebaseServices extends InterneServices {
+class FirebaseServices extends InternetServices {
   FirebaseServices._();
   static final instance = FirebaseServices._();
 

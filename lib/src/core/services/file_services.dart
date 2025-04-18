@@ -33,14 +33,25 @@ class FileServices {
     return aux_file;
   }
 
-  Future<File?> saveBytes(String name, Uint8List bytes) async {
-    File? aux_file;
+  Future<File?> saveBytes(String name, Uint8List bytes,
+      {String folder = "Descargas"}) async {
     try {
-      aux_file = File(await getPath(name));
-      aux_file.writeAsBytesSync(bytes);
-      return aux_file;
-    } catch (e) {}
-    return aux_file;
+      final path = await pp.getExternalStorageDirectories();
+      if (path != null && path.isNotEmpty) {
+        final directoryPath = "${path.first.path}/$folder";
+        final directory = Directory(directoryPath);
+        if (!directory.existsSync()) {
+          directory.createSync(recursive: true);
+        }
+        final filePath = "$directoryPath/$name";
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+        return file;
+      }
+    } catch (e) {
+      print("Error al guardar archivo: $e");
+    }
+    return null;
   }
 
   pw.Widget _image(File image) {
@@ -54,32 +65,48 @@ class FileServices {
     );
   }
 
-  Future<void> generatePDF(Note note) async {
+  Future<void> generatePDF(Note note,
+      {String fileName = "Nota.pdf", String folder = "Documentos"}) async {
     try {
       File? aux_file;
       final pdf = pw.Document();
 
-      if (note.image != null) {
+      if (note.image != null && note.image!.startsWith("http")) {
         aux_file = await saveImage("aux_image.png", note.image!);
+      } else if (note.image != null && File(note.image!).existsSync()) {
+        aux_file = File(note.image!);
       }
 
       pdf.addPage(pw.Page(
-          pageFormat: PdfPageFormat.letter,
-          build: (pw.Context context) {
-            return pw.Column(children: [
-              pw.Text(note.title ?? "Nota sin título",
-                  style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColor.fromInt(0xFF000000))),
-              pw.Divider(),
-              pw.Text(note.description ?? ""),
-              aux_file != null ? _image(aux_file) : pw.SizedBox()
-            ]);
-          }));
+        pageFormat: PdfPageFormat.letter,
+        build: (pw.Context context) {
+          return pw.Column(children: [
+            pw.Text(note.title ?? "Nota sin título",
+                style: pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColor.fromInt(0xFF000000))),
+            pw.SizedBox(height: 12),
+            pw.Text(note.description ?? ""),
+            pw.SizedBox(height: 12),
+            aux_file != null ? _image(aux_file) : pw.SizedBox(),
+          ]);
+        },
+      ));
 
-      final document = File(await getPath("Nota_vacia.pdf"));
-      document.writeAsBytes(await pdf.save());
-    } catch (e) {}
+      final path = await pp.getExternalStorageDirectories();
+      if (path != null && path.isNotEmpty) {
+        final directoryPath = "${path.first.path}/$folder";
+        final directory = Directory(directoryPath);
+        if (!directory.existsSync()) {
+          directory.createSync(recursive: true);
+        }
+        final filePath = "$directoryPath/$fileName";
+        final file = File(filePath);
+        await file.writeAsBytes(await pdf.save());
+      }
+    } catch (e) {
+      print("Error al generar PDF: $e");
+    }
   }
 }

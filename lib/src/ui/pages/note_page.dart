@@ -33,10 +33,7 @@ class NotePage extends StatelessWidget {
   final FirebaseServices _services = FirebaseServices.instance;
 
   String _title(Note note) {
-    if (note.title != null) {
-      return note.title!;
-    }
-    return "";
+    return note.title ?? "";
   }
 
   @override
@@ -44,7 +41,45 @@ class NotePage extends StatelessWidget {
     NotePageArguments arguments =
         ModalRoute.of(context)?.settings.arguments as NotePageArguments;
     final theme = ThemeController.instance;
+
     return Scaffold(
+      backgroundColor: theme.background(),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        title: Text(
+          _title(arguments.note!),
+          style: TextStyle(color: fontColor()),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final response =
+                  await _services.delete("notes", arguments.note!.id!);
+
+              if (response["status"] == StatusNetwork.Connected) {
+                Navigator.pop(context, true);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Nota eliminada exitosamente")),
+                  );
+                });
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error al eliminar la nota")),
+                );
+              }
+            },
+            icon: Icon(Icons.delete, color: fontColor()),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.pushNamed(
@@ -63,41 +98,6 @@ class NotePage extends StatelessWidget {
         },
         child: Icon(Icons.edit),
       ),
-      backgroundColor: theme.background(),
-      appBar: AppBar(
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-            onPressed: () => Navigator.pop(context),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          centerTitle: true,
-          title: Text(
-            _title(arguments.note!),
-            style: TextStyle(color: fontColor()),
-          ),
-          actions: [
-            IconButton(
-                onPressed: () async {
-                  final response =
-                      await _services.delete("notes", arguments.note!.id!);
-
-                  if (response["status"] == StatusNetwork.Connected) {
-                    Navigator.pop(context, true);
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Nota eliminada exitosamente")),
-                      );
-                    });
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error al eliminar la nota")),
-                    );
-                  }
-                },
-                icon: Icon(Icons.delete, color: fontColor()))
-          ]),
       body: _Body(arguments.note!),
     );
   }
@@ -131,7 +131,70 @@ class __BodyState extends State<_Body> {
         ),
       );
     }
-    return Container();
+    return SizedBox.shrink();
+  }
+
+  void _showDownloadOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.image),
+              title: Text('Descargar como imagen (PNG)'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _downloadAsImage();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.picture_as_pdf),
+              title: Text('Descargar como PDF'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _downloadAsPDF();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _downloadAsImage() async {
+    try {
+      final boundary = _repaintKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      listBytes = byteData?.buffer.asUint8List();
+
+      if (listBytes != null) {
+        final title = widget.note.title?.replaceAll(" ", "_") ?? "nota";
+        await FileServices.instance.saveBytes(
+          "$title.png",
+          listBytes!,
+          folder: "Imágenes",
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Imagen guardada en carpeta Imágenes")),
+        );
+      }
+    } catch (e) {
+      print("Error al capturar imagen: $e");
+    }
+  }
+
+  Future<void> _downloadAsPDF() async {
+    final title = widget.note.title?.replaceAll(" ", "_") ?? "nota";
+    await FileServices.instance
+        .generatePDF(widget.note, fileName: "$title.pdf", folder: "Documentos");
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("PDF guardado en carpeta Documentos")));
   }
 
   void urls(String text) {
@@ -146,7 +209,6 @@ class __BodyState extends State<_Body> {
 
   String parseDate() {
     try {
-      print("Fecha original: ${widget.note.date}");
       final _date = widget.note.date?.split("-");
       if (_date == null || _date.length != 3) return "";
 
@@ -160,7 +222,6 @@ class __BodyState extends State<_Body> {
         return widget.note.date ?? "";
       }
     } catch (e) {
-      print("Error parseando la fecha: $e");
       return widget.note.date ?? "";
     }
   }
@@ -168,75 +229,66 @@ class __BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     urls(widget.note.description ?? "");
-    return Column(
-      children: [
-        RepaintBoundary(
-          key: _repaintKey,
-          child: Column(
-            children: [
-              _image(),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      widget.note.description ?? "",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: fontColor()),
-                    ),
-                    Text(
-                      parseDate(),
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(color: ThemeController.instance.primary()),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Divider(),
-        Expanded(
-          child: ListView.builder(
-            physics: BouncingScrollPhysics(),
-            itemCount: widget.note.urls?.length ?? 0,
-            itemBuilder: (context, index) {
-              final url = widget.note.urls![index];
-              return ListTile(
-                onTap: () {
-                  launch(url);
-                },
-                title: Text(
-                  url,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Colors.blue),
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 80.0),
-          child: MediumButton(
-            title: "Descargar",
-            onTap: () async {
-              final RenderRepaintBoundary render = _repaintKey.currentContext!
-                  .findRenderObject() as RenderRepaintBoundary;
-              final image = await render.toImage();
-              final bytes = await image.toByteData(format: ImageByteFormat.png);
 
-              listBytes = bytes!.buffer.asUint8List();
-              if (listBytes != null) {
-                await FileServices.instance
-                    .saveBytes("Captura.png", listBytes!);
-              }
-            },
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RepaintBoundary(
+            key: _repaintKey,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _image(),
+                  SizedBox(height: 16),
+                  Text(
+                    widget.note.description ?? "",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    parseDate(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.deepOrange, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+          Divider(),
+          if ((widget.note.urls?.length ?? 0) > 0)
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: widget.note.urls?.length ?? 0,
+              itemBuilder: (context, index) {
+                final url = widget.note.urls![index];
+                return ListTile(
+                  onTap: () => launch(url),
+                  title: Text(
+                    url,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.blue),
+                  ),
+                );
+              },
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24),
+            child: MediumButton(
+              title: "Descargar",
+              onTap: () => _showDownloadOptions(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

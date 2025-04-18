@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 class Configure {
-  static const PRIMARY = Color(0xFFDBA67B);
+  static const PRIMARY = Color.fromARGB(255, 224, 150, 89);
   static const SECONDARY = Color(0xFF458985);
   static const AUXILIAR = Color(0xFFDFDFC9);
   static const ACCENT = Color(0xFF063647);
