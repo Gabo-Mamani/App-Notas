@@ -185,8 +185,7 @@ class _PrivateBodyState extends State<_PrivateBody> {
                       ),
                     );
                   },
-                  staggeredTileBuilder: (int index) =>
-                      StaggeredTile.count(1, index.isEven ? 1.3 : 1.9),
+                  staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
                   mainAxisSpacing: 1.0,
                   crossAxisSpacing: 1.0,
                 ),

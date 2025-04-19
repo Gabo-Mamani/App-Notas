@@ -49,7 +49,7 @@ class NoteCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 note.description ?? "",
-                maxLines: 2,
+                maxLines: 4,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context)
                     .textTheme

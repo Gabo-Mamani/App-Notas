@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -33,6 +34,62 @@ class FileServices {
     return aux_file;
   }
 
+  Future<void> generatePDFMulti(List<Note> notes,
+      {String fileName = "notas_exportadas.pdf",
+      String folder = "Documentos"}) async {
+    try {
+      final pdf = pw.Document();
+
+      for (final note in notes) {
+        File? auxFile;
+        if (note.image != null && note.image!.startsWith("http")) {
+          auxFile = await saveImage("temp_image.png", note.image!);
+        } else if (note.image != null && File(note.image!).existsSync()) {
+          auxFile = File(note.image!);
+        }
+
+        pdf.addPage(pw.Page(
+          pageFormat: PdfPageFormat.letter,
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(note.title ?? "Sin título",
+                    style: pw.TextStyle(
+                        fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 8),
+                pw.Text(note.description ?? ""),
+                pw.SizedBox(height: 8),
+                auxFile != null ? imageWidget(auxFile) : pw.SizedBox(),
+                pw.Divider(),
+              ],
+            );
+          },
+        ));
+      }
+
+      final path = await getPath(folder);
+      final directory = Directory(path);
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+
+      int index = 1;
+      String finalName = fileName;
+      File file = File("$path/$finalName");
+
+      while (file.existsSync()) {
+        finalName = fileName.replaceAll(".pdf", "_$index.pdf");
+        file = File("$path/$finalName");
+        index++;
+      }
+
+      await file.writeAsBytes(await pdf.save());
+    } catch (e) {
+      print("Error al generar PDF múltiple: $e");
+    }
+  }
+
   Future<File?> saveBytes(String name, Uint8List bytes,
       {String folder = "Descargas"}) async {
     try {
@@ -54,7 +111,7 @@ class FileServices {
     return null;
   }
 
-  pw.Widget _image(File image) {
+  pw.Widget imageWidget(File image) {
     return pw.Container(
       height: 100,
       width: double.infinity,
@@ -89,7 +146,7 @@ class FileServices {
             pw.SizedBox(height: 12),
             pw.Text(note.description ?? ""),
             pw.SizedBox(height: 12),
-            aux_file != null ? _image(aux_file) : pw.SizedBox(),
+            aux_file != null ? imageWidget(aux_file) : pw.SizedBox(),
           ]);
         },
       ));

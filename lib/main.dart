@@ -10,6 +10,8 @@ import 'package:app_notas/src/ui/pages/list_notes_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/private_notes.dart';
 import 'package:app_notas/src/ui/pages/search_notes_pages.dart';
+import 'package:app_notas/src/ui/pages/select_notes_image_page.dart';
+import 'package:app_notas/src/ui/pages/select_notes_page.dart';
 import 'package:app_notas/src/ui/pages/task_list_page.dart';
 import 'package:app_notas/src/ui/pages/trash_page.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +51,11 @@ class MyApp extends StatelessWidget {
             TrashPage.TRASH_PAGE_ROUTE: (context) => TrashPage(),
             TaskListPage.TASK_LIST_PAGE_ROUTE: (context) => TaskListPage(),
             ListSimpleNotes.LIST_SIMPLE_NOTES_ROUTE: (context) =>
-                ListSimpleNotes()
+                ListSimpleNotes(),
+            SelectNotesPage.SELECT_NOTES_PAGE_ROUTE: (context) =>
+                SelectNotesPage(),
+            SelectNotesImagePage.SELECT_NOTES_IMAGE_ROUTE: (context) =>
+                SelectNotesImagePage(),
           },
           debugShowCheckedModeBanner: false, //Quitar barra debug
           title: Constants.mainTitle,

@@ -1,6 +1,6 @@
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/ui/pages/list_notes_page.dart';
-import 'package:app_notas/src/ui/widgets/custom_tiles/custom_tile.dart';
+import 'package:app_notas/src/ui/pages/select_notes_image_page.dart';
+import 'package:app_notas/src/ui/pages/select_notes_page.dart';
 import 'package:flutter/material.dart';
 
 Color fontColor() {
@@ -39,8 +39,9 @@ class _Body extends StatelessWidget {
         height: 120,
         width: 90,
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey)),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -51,8 +52,9 @@ class _Body extends StatelessWidget {
             ),
             Text(
               title,
-              style: TextStyle(color: fontColor(), fontSize: 16),
-            )
+              textAlign: TextAlign.center,
+              style: TextStyle(color: fontColor(), fontSize: 14),
+            ),
           ],
         ),
       ),
@@ -67,8 +69,8 @@ class _Body extends StatelessWidget {
           flex: 1,
           child: Container(
             decoration: BoxDecoration(
-                image:
-                    DecorationImage(image: AssetImage("assets/document.png"))),
+              image: DecorationImage(image: AssetImage("assets/document.png")),
+            ),
           ),
         ),
         Flexible(
@@ -90,36 +92,30 @@ class _Body extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Flexible(
-                        flex: 1,
-                        child: _card(
-                            "PDF",
-                            Icons.book_outlined,
-                            () => Navigator.pushNamed(context,
-                                ListSimpleNotes.LIST_SIMPLE_NOTES_ROUTE,
-                                arguments: ListSimpleArguments(
-                                    action: () {}, pdf: true)))),
-                    Flexible(flex: 1, child: _card("Notas", Icons.note, () {})),
+                      flex: 1,
+                      child: _card(
+                        "Exporta varias\nnotas en PDF",
+                        Icons.note,
+                        () => Navigator.pushNamed(
+                          context,
+                          SelectNotesPage.SELECT_NOTES_PAGE_ROUTE,
+                        ),
+                      ),
+                    ),
                     Flexible(
-                        flex: 1,
-                        child: _card("Imagen", Icons.image_outlined, () {})),
+                      flex: 1,
+                      child: _card(
+                        "Exporta varias\nnotas en imagen",
+                        Icons.image_outlined,
+                        () => Navigator.pushNamed(
+                          context,
+                          SelectNotesImagePage.SELECT_NOTES_IMAGE_ROUTE,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  Divider(),
-                  SimpleTile(
-                    title: "Copiar nota",
-                    onTap: () {},
-                    trailing: Icons.copy,
-                  ),
-                  SimpleTile(
-                    title: "Guardar archivos",
-                    onTap: () {},
-                    trailing: Icons.save,
-                  ),
-                ],
-              )
             ],
           ),
         )

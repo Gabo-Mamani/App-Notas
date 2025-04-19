@@ -23,6 +23,7 @@ class ThemeController {
 
   Color background() =>
       brightnessValue ? Configure.BACKGROUND_LIGHT : Configure.BACKGROUND_DARK;
+  Color textColor() => brightnessValue ? Colors.black : Colors.white;
 
   void changeTheme() async {
     brightness.value = !brightnessValue;

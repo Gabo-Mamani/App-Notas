@@ -82,8 +82,13 @@ class ImageTile extends StatelessWidget {
         children: [
           Text(
             description,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.blueGrey),
+            style: TextStyle(
+              color: Colors.blueGrey,
+              fontSize: 13,
+              height: 1.3,
+            ),
           ),
           Text(
             date ?? "",

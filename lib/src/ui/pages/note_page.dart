@@ -124,6 +124,7 @@ class __BodyState extends State<_Body> {
         height: 100,
         width: double.infinity,
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
           image: DecorationImage(
             image: FileImage(File(widget.note.image!)),
             fit: BoxFit.cover,
@@ -138,7 +139,8 @@ class __BodyState extends State<_Body> {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -191,10 +193,14 @@ class __BodyState extends State<_Body> {
 
   Future<void> _downloadAsPDF() async {
     final title = widget.note.title?.replaceAll(" ", "_") ?? "nota";
-    await FileServices.instance
-        .generatePDF(widget.note, fileName: "$title.pdf", folder: "Documentos");
+    await FileServices.instance.generatePDF(
+      widget.note,
+      fileName: "$title.pdf",
+      folder: "Documentos",
+    );
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("PDF guardado en carpeta Documentos")));
+      SnackBar(content: Text("PDF guardado en carpeta Documentos")),
+    );
   }
 
   void urls(String text) {
@@ -238,29 +244,39 @@ class __BodyState extends State<_Body> {
           RepaintBoundary(
             key: _repaintKey,
             child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: ThemeController.instance.background(),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _image(),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     widget.note.description ?? "",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ThemeController.instance.textColor(),
+                    ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     parseDate(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.deepOrange, fontSize: 14),
+                    style: TextStyle(
+                      color: Colors.deepOrange.shade300,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          Divider(),
           if ((widget.note.urls?.length ?? 0) > 0)
             ListView.builder(
               shrinkWrap: true,
@@ -280,11 +296,13 @@ class __BodyState extends State<_Body> {
                 );
               },
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24),
-            child: MediumButton(
-              title: "Descargar",
-              onTap: () => _showDownloadOptions(),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 40),
+              child: MediumButton(
+                title: "Descargar",
+                onTap: () => _showDownloadOptions(),
+              ),
             ),
           ),
         ],

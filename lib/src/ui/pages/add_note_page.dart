@@ -96,142 +96,140 @@ class __BodyState extends State<_Body> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextInput(
-            title: "Título",
-            controller: _title,
-          ),
-          LargeTextInput(
-            title: "Descripción",
-            controller: _description,
-          ),
-          image != null
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    title: Text(image!),
-                    leading: Icon(Icons.file_open_outlined),
-                  ),
-                )
-              : SizedBox(),
-          Row(
-            children: [
-              Flexible(
-                child: MediumButton(
-                  title: "Cámara",
-                  icon: Icons.camera,
-                  onTap: () async {
-                    try {
-                      final XFile? photo =
-                          await _picker.pickImage(source: ImageSource.camera);
-                      if (photo != null)
-                        setState(() {
-                          image = photo.path;
-                        });
-                    } catch (e) {}
-                  },
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextInput(
+              title: "Título",
+              controller: _title,
+            ),
+            LargeTextInput(
+              title: "Descripción",
+              controller: _description,
+            ),
+            if (image != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ListTile(
+                  title: Text(image!),
+                  leading: Icon(Icons.file_open_outlined),
                 ),
               ),
-              SizedBox(width: 8),
-              Flexible(
-                child: MediumButton(
-                  title: "Galería",
-                  icon: Icons.image,
-                  onTap: () async {
-                    try {
-                      FilePickerResult? result =
-                          await FilePicker.platform.pickFiles();
-
-                      if (result != null) {
-                        File file = File(result.files.single.path!);
-
-                        File? savedFile = await FileServices.instance.saveBytes(
-                            result.files.single.name, await file.readAsBytes());
-
-                        if (savedFile != null) {
+            Row(
+              children: [
+                Flexible(
+                  child: MediumButton(
+                    title: "Cámara",
+                    icon: Icons.camera,
+                    onTap: () async {
+                      try {
+                        final XFile? photo = await _picker.pickImage(
+                          source: ImageSource.camera,
+                        );
+                        if (photo != null) {
                           setState(() {
-                            image = savedFile.path;
+                            image = photo.path;
                           });
                         }
-                      }
-                    } catch (e) {
-                      print("Error al guardar imagen local: $e");
-                    }
-                  },
-                  primaryColor: false,
+                      } catch (e) {}
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Spacer(),
-          MediumButton(
-            title: "Guardar",
-            onTap: () async {
-              note.title = _title.value.text;
-              note.description = _description.value.text;
-              note.private = widget.arguments.private;
-              if (image != null) {
-                note.image = image;
-                note.type = TypeNote.Image;
-              }
-
-              final Map<String, dynamic> response;
-              final Map<String, dynamic> values = {
-                "date": parseDate(),
-                "description": note.description,
-                "image": note.image ?? "",
-                "private": note.private,
-                "state": note.state.toString(),
-                "title": note.title,
-                "type": note.type.toString(),
-              };
-
-              if (widget.arguments.edit) {
-                response = await _services.update("notes", note.id!, values);
-              } else {
-                final existingNotes =
-                    await FirebaseServices.instance.read("notes");
-
-                if (existingNotes["status"] == StatusNetwork.Connected) {
-                  final List<dynamic> allNotes = existingNotes["data"];
-                  for (int i = 0; i < allNotes.length; i++) {
-                    final note = allNotes[i];
-                    await FirebaseServices.instance.update("notes", note.id!, {
-                      "order": (note.order ?? i) + 1,
-                    });
-                  }
+                SizedBox(width: 8),
+                Flexible(
+                  child: MediumButton(
+                    title: "Galería",
+                    icon: Icons.image,
+                    onTap: () async {
+                      try {
+                        FilePickerResult? result =
+                            await FilePicker.platform.pickFiles();
+                        if (result != null) {
+                          File file = File(result.files.single.path!);
+                          File? savedFile =
+                              await FileServices.instance.saveBytes(
+                            result.files.single.name,
+                            await file.readAsBytes(),
+                          );
+                          if (savedFile != null) {
+                            setState(() {
+                              image = savedFile.path;
+                            });
+                          }
+                        }
+                      } catch (e) {
+                        print("Error al guardar imagen local: $e");
+                      }
+                    },
+                    primaryColor: false,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            MediumButton(
+              title: "Guardar",
+              onTap: () async {
+                note.title = _title.value.text;
+                note.description = _description.value.text;
+                note.private = widget.arguments.private;
+                if (image != null) {
+                  note.image = image;
+                  note.type = TypeNote.Image;
                 }
 
-                values["order"] = 0;
-                response = await _services.create("notes", values);
-              }
+                final Map<String, dynamic> response;
+                final Map<String, dynamic> values = {
+                  "date": parseDate(),
+                  "description": note.description,
+                  "image": note.image ?? "",
+                  "private": note.private,
+                  "state": note.state.toString(),
+                  "title": note.title,
+                  "type": note.type.toString(),
+                };
 
-              switch (response["status"]) {
-                case StatusNetwork.Connected:
-                  if (widget.arguments.edit) {
-                    Navigator.pop(context, "edit");
-                  } else {
-                    Navigator.pop(context, true);
+                if (widget.arguments.edit) {
+                  response = await _services.update("notes", note.id!, values);
+                } else {
+                  final existingNotes =
+                      await FirebaseServices.instance.read("notes");
+                  if (existingNotes["status"] == StatusNetwork.Connected) {
+                    final List<dynamic> allNotes = existingNotes["data"];
+                    for (int i = 0; i < allNotes.length; i++) {
+                      final note = allNotes[i];
+                      await FirebaseServices.instance
+                          .update("notes", note.id!, {
+                        "order": (note.order ?? i) + 1,
+                      });
+                    }
                   }
-                  break;
+                  values["order"] = 0;
+                  response = await _services.create("notes", values);
+                }
 
-                case StatusNetwork.Exception:
-                  print("No se guardó");
-                  break;
-                case StatusNetwork.NoInternet:
-                  print("No hay conexión");
-                  break;
-                default:
-                  print("Error desconocido");
-                  break;
-              }
-            },
-          )
-        ],
+                switch (response["status"]) {
+                  case StatusNetwork.Connected:
+                    if (widget.arguments.edit) {
+                      Navigator.pop(context, "edit");
+                    } else {
+                      Navigator.pop(context, true);
+                    }
+                    break;
+                  default:
+                    print("Error al guardar nota");
+                    break;
+                }
+              },
+            ),
+            SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
