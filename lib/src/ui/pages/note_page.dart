@@ -188,7 +188,7 @@ class NotePage extends StatelessWidget {
                 );
 
                 if (result == "edit") {
-                  Navigator.pop(context, true); // <- así notificas a HomePage
+                  Navigator.pop(context, true);
                 }
               },
               child: Icon(Icons.edit),
