@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -8,6 +9,7 @@ import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/core/services/file_services.dart';
+import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
@@ -53,20 +55,66 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
     setState(() => loading = false);
   }
 
+  Future<Uint8List?> _captureWidget(GlobalKey key) async {
+    try {
+      final completer = Completer<Uint8List?>();
+      final overlay = Overlay.of(context);
+
+      final entry = OverlayEntry(
+        builder: (context) => Positioned(
+          left: 0,
+          top: 0,
+          child: Material(
+            color: Colors.transparent,
+            child: RepaintBoundary(
+              key: key,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: NoteVisual(
+                  note: selectedNotes.keys
+                      .firstWhere((n) => repaintKeys[n] == key),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      overlay.insert(entry);
+
+      await Future.delayed(Duration(milliseconds: 300));
+      await WidgetsBinding.instance.endOfFrame;
+
+      final renderObject = key.currentContext?.findRenderObject();
+
+      if (renderObject == null || renderObject is! RenderRepaintBoundary) {
+        print("⚠️ Render object inválido");
+        entry.remove();
+        return null;
+      }
+
+      final image = await renderObject.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final bytes = byteData?.buffer.asUint8List();
+
+      entry.remove(); // limpiar
+      return bytes;
+    } catch (e, stacktrace) {
+      print("🔥 ERROR al capturar widget: $e");
+      print("📍 Stacktrace: $stacktrace");
+      return null;
+    }
+  }
+
   Future<void> _exportAsImages() async {
+    bool huboExito = false;
+
     for (final entry in selectedNotes.entries) {
       if (entry.value) {
         final key = repaintKeys[entry.key];
         if (key == null) continue;
 
-        final boundary =
-            key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-        if (boundary == null) continue;
-
-        final image = await boundary.toImage(pixelRatio: 3.0);
-        final byteData = await image.toByteData(format: ImageByteFormat.png);
-        final bytes = byteData?.buffer.asUint8List();
-
+        final bytes = await _captureWidget(key);
         if (bytes != null) {
           final title = entry.key.title?.replaceAll(" ", "_") ?? "nota";
           await FileServices.instance.saveBytes(
@@ -74,14 +122,26 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
             bytes,
             folder: "Imágenes",
           );
+          huboExito = true;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  "⚠ No se pudo capturar la nota: ${entry.key.title ?? 'Sin título'}"),
+              backgroundColor: Colors.red.shade300,
+            ),
+          );
         }
       }
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text("Notas guardadas como imagen en carpeta Imágenes")),
-    );
+    if (huboExito) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text("Notas guardadas como imagen en carpeta Imágenes")),
+      );
+    }
+
     setState(() => selectedNotes.updateAll((key, _) => false));
   }
 
@@ -96,23 +156,16 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
       final key = repaintKeys[note];
       if (key == null) continue;
 
-      final boundary =
-          key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) continue;
-
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ImageByteFormat.png);
-      final bytes = byteData?.buffer.asUint8List();
-
-      if (bytes != null) {
-        final file = await FileServices.instance.saveBytes(
-          "${note.title?.replaceAll(" ", "_") ?? "nota"}.png",
-          bytes,
-          folder: "Compartidas",
+      final bytes = await _captureWidget(key);
+      if (bytes == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "⚠ No se pudo generar la imagen para compartir: ${note.title ?? 'Sin título'}"),
+            backgroundColor: Colors.red.shade300,
+          ),
         );
-        if (file != null) {
-          imagesToShare.add(XFile(file.path));
-        }
+        continue;
       }
     }
 
@@ -158,7 +211,10 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: _buildNoteImage(note),
+            child: note.image != null && File(note.image!).existsSync()
+                ? Image.file(File(note.image!),
+                    width: 50, height: 50, fit: BoxFit.cover)
+                : Image.asset("assets/default_note.png", width: 50, height: 50),
           ),
           SizedBox(width: 12),
           Expanded(
@@ -204,65 +260,6 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
                 selectedNotes[note] = value ?? false;
               });
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoteImage(Note note) {
-    if (note.image != null && note.image!.trim().isNotEmpty) {
-      try {
-        final file = File(note.image!);
-        if (file.existsSync()) {
-          return Image.file(
-            file,
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          );
-        }
-      } catch (_) {}
-    }
-
-    return Image.asset(
-      "assets/default_note.png",
-      width: 50,
-      height: 50,
-      fit: BoxFit.cover,
-    );
-  }
-
-  Widget _buildNoteFullRender(Note note) {
-    return Container(
-      width: 800,
-      padding: const EdgeInsets.all(20),
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (note.image != null && File(note.image!).existsSync())
-            Image.file(
-              File(note.image!),
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-          SizedBox(height: 20),
-          Text(
-            note.title ?? "Sin título",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Text(
-            note.description ?? "",
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Text(
-            _parseDate(note.date),
-            style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ],
       ),
@@ -327,14 +324,28 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
                     ),
                   ],
                 ),
-                Offstage(
-                  child: Column(
-                    children: selectedNotes.keys.map((note) {
-                      return RepaintBoundary(
-                        key: repaintKeys[note],
-                        child: _buildNoteFullRender(note),
-                      );
-                    }).toList(),
+                // 👇 Render oculto de cada nota para exportar correctamente en release
+                Visibility(
+                  visible: true,
+                  maintainState: true,
+                  maintainAnimation: true,
+                  maintainSize: true,
+                  child: Offstage(
+                    offstage: true,
+                    child: Column(
+                      children: selectedNotes.keys.map((note) {
+                        return RepaintBoundary(
+                          key: repaintKeys[note],
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: NoteVisual(note: note),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ],

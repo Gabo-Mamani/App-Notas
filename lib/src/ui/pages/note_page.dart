@@ -14,6 +14,86 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class NoteVisual extends StatelessWidget {
+  final Note note;
+
+  const NoteVisual({super.key, required this.note});
+
+  String _parseDate(String? date) {
+    try {
+      final _date = date?.split("-");
+      if (_date == null || _date.length != 3) return "";
+      final day = _date[0];
+      final month = int.parse(_date[1]);
+      final year = _date[2];
+      return "$day de ${Constants.nameMonth[month]} del $year";
+    } catch (_) {
+      return date ?? "";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ThemeController.instance;
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.background(),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (note.image != null && File(note.image!).existsSync())
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: FileImage(File(note.image!)),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+          if ((note.title?.isNotEmpty ?? false))
+            Text(
+              note.title!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme.textColor(),
+              ),
+            ),
+          const SizedBox(height: 8),
+          if ((note.description?.isNotEmpty ?? false))
+            Text(
+              note.description!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textColor(),
+              ),
+            ),
+          const SizedBox(height: 12),
+          Text(
+            _parseDate(note.date),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.deepOrange.shade300,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class NotePageArguments {
   final Note? note;
   NotePageArguments({this.note});
@@ -38,80 +118,100 @@ class NotePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    NotePageArguments arguments =
-        ModalRoute.of(context)?.settings.arguments as NotePageArguments;
+    final routeArgs = ModalRoute.of(context)?.settings.arguments;
+    final Note? currentNote =
+        (routeArgs is NotePageArguments ? routeArgs.note : null) ?? note;
+
+    if (currentNote == null) {
+      return Scaffold(
+        body: Center(
+          child:
+              Text("Nota no disponible", style: TextStyle(color: fontColor())),
+        ),
+      );
+    }
+
     final theme = ThemeController.instance;
 
     return Scaffold(
       backgroundColor: theme.background(),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: !repaint,
+        leading: repaint
+            ? null
+            : IconButton(
+                icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+                onPressed: () => Navigator.pop(context),
+              ),
         elevation: 0,
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: Text(
-          _title(arguments.note!),
+          _title(currentNote),
           style: TextStyle(color: fontColor()),
         ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final response =
-                  await _services.delete("notes", arguments.note!.id!);
+        actions: repaint
+            ? null
+            : [
+                IconButton(
+                  onPressed: () async {
+                    final response =
+                        await _services.delete("notes", currentNote.id!);
 
-              if (response["status"] == StatusNetwork.Connected) {
-                Navigator.pop(context, true);
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Nota eliminada exitosamente")),
-                  );
-                });
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error al eliminar la nota")),
+                    if (response["status"] == StatusNetwork.Connected) {
+                      Navigator.pop(context, true);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text("Nota eliminada exitosamente")),
+                        );
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Error al eliminar la nota")),
+                      );
+                    }
+                  },
+                  icon: Icon(Icons.delete, color: fontColor()),
+                ),
+              ],
+      ),
+      floatingActionButton: repaint
+          ? null
+          : FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.pushNamed(
+                  context,
+                  AddNotePage.ADD_NOTE_PAGE_ROUTE,
+                  arguments:
+                      AddNotePageArguments(note: currentNote, edit: true),
                 );
-              }
-            },
-            icon: Icon(Icons.delete, color: fontColor()),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.pushNamed(
-            context,
-            AddNotePage.ADD_NOTE_PAGE_ROUTE,
-            arguments: AddNotePageArguments(note: arguments.note, edit: true),
-          );
 
-          if (result == "edit") {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("¡Nota actualizada exitosamente!")),
-              );
-            });
-          }
-        },
-        child: Icon(Icons.edit),
-      ),
-      body: _Body(arguments.note!),
+                if (result == "edit") {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text("¡Nota actualizada exitosamente!")),
+                    );
+                  });
+                }
+              },
+              child: Icon(Icons.edit),
+            ),
+      body: NoteBody(currentNote),
     );
   }
 }
 
-class _Body extends StatefulWidget {
+class NoteBody extends StatefulWidget {
   final Note note;
-  _Body(this.note, {Key? key}) : super(key: key);
+  NoteBody(this.note, {Key? key}) : super(key: key);
 
   @override
-  __BodyState createState() => __BodyState();
+  _NoteBodyState createState() => _NoteBodyState();
 }
 
-class __BodyState extends State<_Body> {
+class _NoteBodyState extends State<NoteBody> {
   final _repaintKey = GlobalKey();
   Uint8List? listBytes;
 
@@ -243,39 +343,7 @@ class __BodyState extends State<_Body> {
         children: [
           RepaintBoundary(
             key: _repaintKey,
-            child: Container(
-              decoration: BoxDecoration(
-                color: ThemeController.instance.background(),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _image(),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.note.description ?? "",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: ThemeController.instance.textColor(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    parseDate(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.deepOrange.shade300,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: NoteVisual(note: widget.note),
           ),
           if ((widget.note.urls?.length ?? 0) > 0)
             ListView.builder(
