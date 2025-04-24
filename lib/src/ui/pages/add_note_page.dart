@@ -69,10 +69,8 @@ class __BodyState extends State<_Body> {
   late TextEditingController _description;
 
   String? image;
-
   Note note = Note();
   final ImagePicker _picker = ImagePicker();
-
   FirebaseServices _services = FirebaseServices.instance;
 
   String parseDate() {
@@ -91,11 +89,19 @@ class __BodyState extends State<_Body> {
       _title = TextEditingController(text: "");
       _description = TextEditingController(text: "");
     }
-
     super.initState();
   }
 
-  @override
+  void _deleteImage() {
+    setState(() {
+      image = null;
+      if (widget.arguments.edit) {
+        note.image = null;
+        note.type = TypeNote.Text;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -112,12 +118,31 @@ class __BodyState extends State<_Body> {
               title: "Descripción",
               controller: _description,
             ),
-            if (image != null)
+            if (image != null || (widget.arguments.edit && note.image != null))
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ListTile(
-                  title: Text(image!),
-                  leading: Icon(Icons.file_open_outlined),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image: FileImage(File(image ?? note.image!)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: _deleteImage,
+                        icon: Icon(Icons.delete, color: Colors.redAccent),
+                        tooltip: "Eliminar imagen",
+                      ),
+                    ),
+                  ],
                 ),
               ),
             Row(
@@ -178,9 +203,12 @@ class __BodyState extends State<_Body> {
                 note.title = _title.value.text;
                 note.description = _description.value.text;
                 note.private = widget.arguments.private;
+
                 if (image != null) {
                   note.image = image;
                   note.type = TypeNote.Image;
+                } else if (widget.arguments.edit && note.image != null) {
+                  note.type = note.type ?? TypeNote.Image;
                 }
 
                 final Map<String, dynamic> response;

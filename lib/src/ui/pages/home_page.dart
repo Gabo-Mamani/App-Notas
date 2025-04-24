@@ -223,7 +223,14 @@ class _BodyState extends State<_Body> {
                                   NotePage.NOTE_PAGE_ROUTE,
                                   arguments: NotePageArguments(note: note),
                                 );
-                                if (result == true) _refresh();
+                                if (result == true) {
+                                  _refresh();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            "Nota actualizada exitosamente")),
+                                  );
+                                }
                               },
                             ),
                           );

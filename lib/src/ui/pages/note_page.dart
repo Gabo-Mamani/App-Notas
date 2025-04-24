@@ -188,12 +188,7 @@ class NotePage extends StatelessWidget {
                 );
 
                 if (result == "edit") {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text("¡Nota actualizada exitosamente!")),
-                    );
-                  });
+                  Navigator.pop(context, true); // <- así notificas a HomePage
                 }
               },
               child: Icon(Icons.edit),

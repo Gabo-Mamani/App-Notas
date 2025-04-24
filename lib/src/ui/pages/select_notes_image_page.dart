@@ -88,7 +88,7 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
       final renderObject = key.currentContext?.findRenderObject();
 
       if (renderObject == null || renderObject is! RenderRepaintBoundary) {
-        print("⚠️ Render object inválido");
+        print("Render object inválido");
         entry.remove();
         return null;
       }
@@ -97,11 +97,11 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
       final byteData = await image.toByteData(format: ImageByteFormat.png);
       final bytes = byteData?.buffer.asUint8List();
 
-      entry.remove(); // limpiar
+      entry.remove();
       return bytes;
     } catch (e, stacktrace) {
-      print("🔥 ERROR al capturar widget: $e");
-      print("📍 Stacktrace: $stacktrace");
+      print("ERROR al capturar widget: $e");
+      print("Stacktrace: $stacktrace");
       return null;
     }
   }
@@ -161,7 +161,7 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                "⚠ No se pudo generar la imagen para compartir: ${note.title ?? 'Sin título'}"),
+                "No se pudo generar la imagen para compartir: ${note.title ?? 'Sin título'}"),
             backgroundColor: Colors.red.shade300,
           ),
         );
@@ -172,7 +172,7 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
     if (imagesToShare.isNotEmpty) {
       await Share.shareXFiles(
         imagesToShare,
-        text: "Te comparto estas notas como imágenes 🖼️",
+        text: "Te comparto estas notas como imágenes",
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -324,7 +324,6 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
                     ),
                   ],
                 ),
-                // 👇 Render oculto de cada nota para exportar correctamente en release
                 Visibility(
                   visible: true,
                   maintainState: true,

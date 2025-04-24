@@ -58,7 +58,11 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             Align(
               alignment: Alignment.topRight,
               child: GestureDetector(
-                onTap: widget.close,
+                onTap: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  _controller.clear();
+                  widget.close?.call();
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Icon(Icons.close),
@@ -102,10 +106,14 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                     onPressed: () async {
                       final password =
                           await PreferencesService.instance.getPassword();
-                      if (password == _controller.value.text) {
+
+                      FocusManager.instance.primaryFocus?.unfocus();
+
+                      if (password == _controller.text) {
+                        _controller.clear();
+                        widget.close?.call();
                         Navigator.pushNamed(
                             context, NotePrivatePage.NOTE_PRIVATE_PAGE_ROUTE);
-                        widget.close!();
                       } else {
                         showDialog(
                           context: context,
@@ -115,7 +123,10 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                               content: Text("La Contraseña es incorrecta"),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _controller.clear();
+                                  },
                                   child: Text("Aceptar"),
                                 )
                               ],
