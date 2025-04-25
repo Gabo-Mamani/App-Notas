@@ -83,7 +83,9 @@ class _PrivateBodyState extends State<_PrivateBody> {
     final response = await _services.read("notes");
     if (response["status"] == StatusNetwork.Connected) {
       final allNotes = (response["data"] as List).cast<Note>();
-      notes = allNotes.where((note) => note.private == true).toList()
+      notes = allNotes
+          .where((note) => note.private == true && (note.deleted != true))
+          .toList()
         ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
     }
     setState(() => isLoading = false);
@@ -115,81 +117,102 @@ class _PrivateBodyState extends State<_PrivateBody> {
         Expanded(
           child: isLoading
               ? Center(child: CircularProgressIndicator())
-              : StaggeredGridView.countBuilder(
-                  physics: BouncingScrollPhysics(),
-                  crossAxisCount: 2,
-                  itemCount: notes.length,
-                  itemBuilder: (context, index) {
-                    final note = notes[index];
-                    return LongPressDraggable(
-                      data: index,
-                      onDragStarted: () =>
-                          setState(() => draggingIndex = index),
-                      onDragEnd: (_) => setState(() => draggingIndex = null),
-                      feedback: Material(
-                        color: Colors.transparent,
-                        child: Opacity(
-                          opacity: 0.8,
-                          child: Container(
-                            width: 160,
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: ThemeController.instance
-                                  .primary()
-                                  .withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(color: Colors.black26, blurRadius: 8)
-                              ],
+              : notes.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock_outline,
+                              size: 80, color: fontColor().withOpacity(0.3)),
+                          SizedBox(height: 16),
+                          Text(
+                            "No hay notas privadas aún",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: fontColor().withOpacity(0.6),
+                              fontWeight: FontWeight.w500,
                             ),
-                            child: Text(
-                              note.title ?? "Nota",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    )
+                  : StaggeredGridView.countBuilder(
+                      physics: BouncingScrollPhysics(),
+                      crossAxisCount: 2,
+                      itemCount: notes.length,
+                      itemBuilder: (context, index) {
+                        final note = notes[index];
+                        return LongPressDraggable(
+                          data: index,
+                          onDragStarted: () =>
+                              setState(() => draggingIndex = index),
+                          onDragEnd: (_) =>
+                              setState(() => draggingIndex = null),
+                          feedback: Material(
+                            color: Colors.transparent,
+                            child: Opacity(
+                              opacity: 0.8,
+                              child: Container(
+                                width: 160,
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: ThemeController.instance
+                                      .primary()
+                                      .withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black26, blurRadius: 8)
+                                  ],
+                                ),
+                                child: Text(
+                                  note.title ?? "Nota",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      child: DragTarget<int>(
-                        onAccept: (fromIndex) async {
-                          setState(() {
-                            final movedNote = notes.removeAt(fromIndex);
-                            notes.insert(index, movedNote);
-                          });
+                          child: DragTarget<int>(
+                            onAccept: (fromIndex) async {
+                              setState(() {
+                                final movedNote = notes.removeAt(fromIndex);
+                                notes.insert(index, movedNote);
+                              });
 
-                          await _updateOrderInFirebase();
+                              await _updateOrderInFirebase();
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Orden actualizado")),
-                          );
-                        },
-                        onWillAccept: (fromIndex) => fromIndex != index,
-                        builder: (context, candidateData, rejectedData) {
-                          return Opacity(
-                            opacity: draggingIndex == index ? 0.5 : 1.0,
-                            child: NoteCard(
-                              note,
-                              onTap: () async {
-                                final result = await Navigator.pushNamed(
-                                  context,
-                                  NotePage.NOTE_PAGE_ROUTE,
-                                  arguments: NotePageArguments(note: note),
-                                );
-                                if (result == true) _refresh();
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
-                  mainAxisSpacing: 1.0,
-                  crossAxisSpacing: 1.0,
-                ),
-        ),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Orden actualizado")),
+                              );
+                            },
+                            onWillAccept: (fromIndex) => fromIndex != index,
+                            builder: (context, candidateData, rejectedData) {
+                              return Opacity(
+                                opacity: draggingIndex == index ? 0.5 : 1.0,
+                                child: NoteCard(
+                                  note,
+                                  onTap: () async {
+                                    final result = await Navigator.pushNamed(
+                                      context,
+                                      NotePage.NOTE_PAGE_ROUTE,
+                                      arguments: NotePageArguments(note: note),
+                                    );
+                                    if (result == true) _refresh();
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
+                      mainAxisSpacing: 1.0,
+                      crossAxisSpacing: 1.0,
+                    ),
+        )
       ],
     );
   }

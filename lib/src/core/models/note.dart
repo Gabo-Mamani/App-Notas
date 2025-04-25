@@ -14,6 +14,7 @@ class Note {
   String? date;
   String? description;
   bool private;
+  bool deleted;
   List<String>? urls;
   String? image;
   TypeNote type;
@@ -26,6 +27,7 @@ class Note {
     this.date,
     this.description,
     this.private = false,
+    this.deleted = false,
     this.urls,
     this.image,
     this.type = TypeNote.Text,
@@ -42,6 +44,8 @@ class Note {
       description: snapshot["description"],
       date: snapshot["date"],
       private: snapshot["private"],
+      deleted:
+          snapshot.data().containsKey("deleted") ? snapshot["deleted"] : false,
       type: convertType(snapshot["type"]),
       state: convertState(snapshot["state"]),
       id: id,

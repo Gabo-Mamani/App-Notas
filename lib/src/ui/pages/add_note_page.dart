@@ -238,6 +238,7 @@ class __BodyState extends State<_Body> {
                     }
                   }
                   values["order"] = 0;
+                  values["deleted"] = false;
                   response = await _services.create("notes", values);
                 }
 

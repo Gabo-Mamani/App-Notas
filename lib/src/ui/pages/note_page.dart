@@ -155,21 +155,43 @@ class NotePage extends StatelessWidget {
             : [
                 IconButton(
                   onPressed: () async {
-                    final response =
-                        await _services.delete("notes", currentNote.id!);
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Text("¿Eliminar nota?"),
+                        content: Text("¿Deseas mover esta nota a la papelera?"),
+                        actions: [
+                          TextButton(
+                              child: Text("Cancelar"),
+                              onPressed: () => Navigator.pop(context, false)),
+                          TextButton(
+                              child: Text("Mover a papelera"),
+                              onPressed: () => Navigator.pop(context, true)),
+                        ],
+                      ),
+                    );
 
-                    if (response["status"] == StatusNetwork.Connected) {
-                      Navigator.pop(context, true);
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (confirmed == true) {
+                      final response =
+                          await _services.update("notes", currentNote.id!, {
+                        "deleted": true,
+                      });
+
+                      if (response["status"] == StatusNetwork.Connected) {
+                        Navigator.pop(context, true);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text("Nota movida a la papelera")),
+                          );
+                        });
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                              content: Text("Nota eliminada exitosamente")),
+                              content:
+                                  Text("Error al mover la nota a la papelera")),
                         );
-                      });
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Error al eliminar la nota")),
-                      );
+                      }
                     }
                   },
                   icon: Icon(Icons.delete, color: fontColor()),
