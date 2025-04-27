@@ -76,7 +76,8 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
       setState(() {
         filteredNotes = allNotes.where((note) {
           final title = note.title?.toLowerCase() ?? "";
-          return title.contains(query);
+          final notDeleted = note.deleted != true;
+          return title.contains(query) && notDeleted;
         }).toList();
       });
     } else {
@@ -198,7 +199,8 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
 
                         List<dynamic> recentNotes = response["data"];
                         recentNotes = recentNotes
-                            .where((note) => note.private != true)
+                            .where((note) =>
+                                note.private != true && note.deleted != true)
                             .toList();
 
                         recentNotes.sort(

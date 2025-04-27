@@ -81,8 +81,13 @@ class _HomePageState extends State<HomePage>
               ),
               IconButton(
                 icon: Icon(CupertinoIcons.delete_simple, color: fontColor()),
-                onPressed: () =>
-                    Navigator.pushNamed(context, TrashPage.TRASH_PAGE_ROUTE),
+                onPressed: () async {
+                  final result = await Navigator.pushNamed(
+                      context, TrashPage.TRASH_PAGE_ROUTE);
+                  if (result == true) {
+                    _bodyKey.currentState?._refresh();
+                  }
+                },
               ),
               IconButton(
                 icon: Icon(Icons.brightness_6, color: fontColor()),

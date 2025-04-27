@@ -128,6 +128,10 @@ class __BodyState extends State<_Body> {
                                   : "Nota eliminada permanentemente"),
                             ),
                           );
+
+                          if (value == 0) {
+                            Navigator.pop(context, true);
+                          }
                         },
                         icon: Icon(Icons.more_vert, color: fontColor()),
                         itemBuilder: (context) => [
