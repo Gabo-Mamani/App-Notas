@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
-import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/add_note_page.dart';
 import 'package:app_notas/src/ui/pages/error_page.dart';
 import 'package:app_notas/src/ui/pages/export_notes_page.dart';
@@ -60,7 +59,6 @@ class MyApp extends StatelessWidget {
             NotePrivatePage.NOTE_PRIVATE_PAGE_ROUTE: (_) => NotePrivatePage(),
             SearchNotesPage.SEARCH_NOTES_PAGE_ROUTE: (_) => SearchNotesPage(),
             AddNotePage.ADD_NOTE_PAGE_ROUTE: (_) => AddNotePage(),
-            AddAttachmentPage.ADD_ATTACHMENT_PAGE: (_) => AddAttachmentPage(),
             ExportNotesPage.EXPORT_NOTES_PAGE_ROUTE: (_) => ExportNotesPage(),
             TrashPage.TRASH_PAGE_ROUTE: (_) => TrashPage(),
             TaskListPage.TASK_LIST_PAGE_ROUTE: (_) => TaskListPage(),

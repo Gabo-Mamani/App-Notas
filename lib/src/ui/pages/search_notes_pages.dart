@@ -2,7 +2,6 @@ import 'package:app_notas/src/core/constants/data.dart';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
-import 'package:app_notas/src/ui/pages/add_attachment_page.dart';
 import 'package:app_notas/src/ui/pages/export_notes_page.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
 import 'package:app_notas/src/ui/pages/task_list_page.dart';
@@ -164,11 +163,6 @@ class _BodyState extends State<_Body> with SingleTickerProviderStateMixin {
                             title: "Notas privadas",
                             leading: Icons.lock,
                             onTap: () => _controller.open()),
-                        SimpleTile(
-                            title: "Recursos",
-                            leading: Icons.image,
-                            onTap: () => Navigator.pushNamed(context,
-                                AddAttachmentPage.ADD_ATTACHMENT_PAGE)),
                       ],
                     ),
                     AppBar(
