@@ -10,6 +10,7 @@ import 'package:app_notas/src/core/models/note.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/ui/pages/note_page.dart';
+import 'package:app_notas/src/ui/widgets/common/safe_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
@@ -209,12 +210,11 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: note.image != null && File(note.image!).existsSync()
-                ? Image.file(File(note.image!),
-                    width: 50, height: 50, fit: BoxFit.cover)
-                : Image.asset("assets/default_note.png", width: 50, height: 50),
+          SafeImage(
+            path: note.image ?? "",
+            width: 50,
+            height: 50,
+            radius: 8,
           ),
           SizedBox(width: 12),
           Expanded(

@@ -15,6 +15,15 @@ class NoteCard extends StatelessWidget {
     final hasImage = note.image != null && note.image!.isNotEmpty;
     final textColor = theme.brightnessValue ? Colors.black : Colors.white;
 
+    Widget _fallbackIcon() {
+      return Container(
+        height: 100,
+        width: double.infinity,
+        color: Colors.grey.shade300,
+        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+      );
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -28,12 +37,23 @@ class NoteCard extends StatelessWidget {
             if (hasImage)
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-                child: Image.file(
-                  File(note.image!),
-                  height: 100,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: note.image!.startsWith("http")
+                    ? Image.network(
+                        note.image!,
+                        height: 100,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _fallbackIcon(),
+                      )
+                    : File(note.image!).existsSync()
+                        ? Image.file(
+                            File(note.image!),
+                            height: 100,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => _fallbackIcon(),
+                          )
+                        : _fallbackIcon(),
               ),
             Padding(
               padding: const EdgeInsets.all(8.0),

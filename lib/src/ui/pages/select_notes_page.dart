@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:app_notas/src/core/constants/parameters.dart';
+import 'package:app_notas/src/ui/widgets/common/safe_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -172,9 +173,11 @@ class _SelectNotesPageState extends State<SelectNotesPage> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: _buildNoteImage(note),
+                                  SafeImage(
+                                    path: note.image ?? "",
+                                    width: 50,
+                                    height: 50,
+                                    radius: 8,
                                   ),
                                   SizedBox(width: 12),
                                   Expanded(

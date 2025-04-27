@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_notas/src/core/constants/parameters.dart';
 import 'package:app_notas/src/core/controllers/theme_controller.dart';
 import 'package:app_notas/src/core/models/note.dart';
+import 'package:app_notas/src/core/services/cloudinary_service.dart';
 import 'package:app_notas/src/core/services/file_services.dart';
 import 'package:app_notas/src/core/services/firebase_services.dart';
 import 'package:app_notas/src/ui/widgets/buttons/simple_buttons.dart';
@@ -78,6 +79,37 @@ class __BodyState extends State<_Body> {
     return "${date.day}-${date.month}-${date.year}";
   }
 
+  Widget _buildImage() {
+    final currentImage = image ?? note.image;
+
+    if (currentImage == null || currentImage.trim().isEmpty) {
+      return Center(
+          child: Icon(Icons.broken_image, size: 48, color: Colors.grey));
+    }
+
+    if (currentImage.startsWith('http')) {
+      return Image.network(
+        currentImage,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Center(
+            child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
+      );
+    } else {
+      final file = File(currentImage);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Center(
+              child: Icon(Icons.broken_image, size: 48, color: Colors.grey)),
+        );
+      } else {
+        return Center(
+            child: Icon(Icons.broken_image, size: 48, color: Colors.grey));
+      }
+    }
+  }
+
   @override
   void initState() {
     if (widget.arguments.edit) {
@@ -128,10 +160,11 @@ class __BodyState extends State<_Body> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        image: DecorationImage(
-                          image: FileImage(File(image ?? note.image!)),
-                          fit: BoxFit.cover,
-                        ),
+                        color: Colors.grey.shade200,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: _buildImage(),
                       ),
                     ),
                     Align(
@@ -198,64 +231,71 @@ class __BodyState extends State<_Body> {
             ),
             SizedBox(height: 20),
             MediumButton(
-              title: "Guardar",
-              onTap: () async {
-                note.title = _title.value.text;
-                note.description = _description.value.text;
-                note.private = widget.arguments.private;
+                title: "Guardar",
+                onTap: () async {
+                  note.title = _title.value.text;
+                  note.description = _description.value.text;
+                  note.private = widget.arguments.private;
 
-                if (image != null) {
-                  note.image = image;
-                  note.type = TypeNote.Image;
-                } else if (widget.arguments.edit && note.image != null) {
-                  note.type = note.type ?? TypeNote.Image;
-                }
-
-                final Map<String, dynamic> response;
-                final Map<String, dynamic> values = {
-                  "date": parseDate(),
-                  "description": note.description,
-                  "image": note.image ?? "",
-                  "private": note.private,
-                  "state": note.state.toString(),
-                  "title": note.title,
-                  "type": note.type.toString(),
-                };
-
-                if (widget.arguments.edit) {
-                  response = await _services.update("notes", note.id!, values);
-                } else {
-                  final existingNotes =
-                      await FirebaseServices.instance.read("notes");
-                  if (existingNotes["status"] == StatusNetwork.Connected) {
-                    final List<dynamic> allNotes = existingNotes["data"];
-                    for (int i = 0; i < allNotes.length; i++) {
-                      final note = allNotes[i];
-                      await FirebaseServices.instance
-                          .update("notes", note.id!, {
-                        "order": (note.order ?? i) + 1,
-                      });
-                    }
-                  }
-                  values["order"] = 0;
-                  values["deleted"] = false;
-                  response = await _services.create("notes", values);
-                }
-
-                switch (response["status"]) {
-                  case StatusNetwork.Connected:
-                    if (widget.arguments.edit) {
-                      Navigator.pop(context, "edit");
+                  if (image != null) {
+                    final url =
+                        await CloudinaryService.uploadImage(File(image!));
+                    if (url != null) {
+                      note.image = url;
+                      note.type = TypeNote.ImagenNetwork;
                     } else {
-                      Navigator.pop(context, true);
+                      note.image = image;
+                      note.type = TypeNote.Image;
                     }
-                    break;
-                  default:
-                    print("Error al guardar nota");
-                    break;
-                }
-              },
-            ),
+                  } else if (widget.arguments.edit && note.image != null) {
+                    note.type = note.type ?? TypeNote.Image;
+                  }
+
+                  final Map<String, dynamic> response;
+                  final Map<String, dynamic> values = {
+                    "date": parseDate(),
+                    "description": note.description,
+                    "image": note.image ?? "",
+                    "private": note.private,
+                    "state": note.state.toString(),
+                    "title": note.title,
+                    "type": note.type.toString(),
+                  };
+
+                  if (widget.arguments.edit) {
+                    response =
+                        await _services.update("notes", note.id!, values);
+                  } else {
+                    final existingNotes =
+                        await FirebaseServices.instance.read("notes");
+                    if (existingNotes["status"] == StatusNetwork.Connected) {
+                      final List<dynamic> allNotes = existingNotes["data"];
+                      for (int i = 0; i < allNotes.length; i++) {
+                        final note = allNotes[i];
+                        await FirebaseServices.instance
+                            .update("notes", note.id!, {
+                          "order": (note.order ?? i) + 1,
+                        });
+                      }
+                    }
+                    values["order"] = 0;
+                    values["deleted"] = false;
+                    response = await _services.create("notes", values);
+                  }
+
+                  switch (response["status"]) {
+                    case StatusNetwork.Connected:
+                      if (widget.arguments.edit) {
+                        Navigator.pop(context, "edit");
+                      } else {
+                        Navigator.pop(context, true);
+                      }
+                      break;
+                    default:
+                      print("Error al guardar nota");
+                      break;
+                  }
+                }),
             SizedBox(height: 40),
           ],
         ),

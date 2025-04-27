@@ -45,16 +45,36 @@ class NoteVisual extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (note.image != null && File(note.image!).existsSync())
+          if (note.image != null && note.image!.trim().isNotEmpty)
             Container(
               height: 100,
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                image: DecorationImage(
-                  image: FileImage(File(note.image!)),
-                  fit: BoxFit.cover,
-                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: note.image!.startsWith("http")
+                    ? Image.network(
+                        note.image!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(Icons.broken_image,
+                                size: 48, color: Colors.grey),
+                          );
+                        },
+                      )
+                    : Image.file(
+                        File(note.image!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(Icons.broken_image,
+                                size: 48, color: Colors.grey),
+                          );
+                        },
+                      ),
               ),
             ),
           const SizedBox(height: 16),
@@ -237,13 +257,18 @@ class _NoteBodyState extends State<NoteBody> {
         widget.note.type == TypeNote.ImagenNetwork ||
         widget.note.type == TypeNote.TextImage ||
         widget.note.type == TypeNote.TextImageNetwork) {
+      final imageProvider =
+          widget.note.image != null && widget.note.image!.startsWith("http")
+              ? NetworkImage(widget.note.image!)
+              : FileImage(File(widget.note.image!)) as ImageProvider;
+
       return Container(
         height: 100,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           image: DecorationImage(
-            image: FileImage(File(widget.note.image!)),
+            image: imageProvider,
             fit: BoxFit.cover,
           ),
         ),

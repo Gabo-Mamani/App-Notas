@@ -34,6 +34,15 @@ class SimpleTile extends StatelessWidget {
   }
 }
 
+Widget _fallbackIcon() {
+  return Container(
+    width: 50,
+    height: 85,
+    color: Colors.grey.shade300,
+    child: Icon(Icons.broken_image, color: Colors.grey),
+  );
+}
+
 class ImageTile extends StatelessWidget {
   final String title;
   final String image;
@@ -64,18 +73,25 @@ class ImageTile extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       title: Text(title, style: TextStyle(color: getColorText())),
-      leading: Container(
-        height: 85,
-        width: 50,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: showDefaultImage
-                ? AssetImage("assets/default_note.png") as ImageProvider
-                : FileImage(File(image)),
-            fit: BoxFit.cover,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: (image.startsWith('http') || image.startsWith('https'))
+            ? Image.network(
+                image,
+                width: 50,
+                height: 85,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _fallbackIcon(),
+              )
+            : File(image).existsSync()
+                ? Image.file(
+                    File(image),
+                    width: 50,
+                    height: 85,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallbackIcon(),
+                  )
+                : _fallbackIcon(),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
