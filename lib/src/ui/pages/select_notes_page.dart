@@ -39,7 +39,7 @@ class _SelectNotesPageState extends State<SelectNotesPage> {
     if (response["status"] == StatusNetwork.Connected) {
       final notes = (response["data"] as List)
           .cast<Note>()
-          .where((n) => !n.private)
+          .where((n) => !n.private && !n.deleted)
           .toList();
       notes.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
       for (final note in notes) {

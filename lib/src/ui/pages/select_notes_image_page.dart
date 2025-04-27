@@ -45,7 +45,7 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
     if (response["status"] == StatusNetwork.Connected) {
       final notes = (response["data"] as List)
           .cast<Note>()
-          .where((n) => !n.private)
+          .where((n) => !n.private && !n.deleted)
           .toList();
       notes.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
       for (final note in notes) {
@@ -168,6 +168,13 @@ class _SelectNotesImagePageState extends State<SelectNotesImagePage> {
         );
         continue;
       }
+
+      final tempDir = Directory.systemTemp;
+      final title = note.title?.replaceAll(" ", "_") ?? "nota";
+      final file = await File('${tempDir.path}/$title.png').create();
+      await file.writeAsBytes(bytes);
+
+      imagesToShare.add(XFile(file.path));
     }
 
     if (imagesToShare.isNotEmpty) {
