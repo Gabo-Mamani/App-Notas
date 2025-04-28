@@ -8,6 +8,7 @@ class TextInput extends StatelessWidget {
   final Function(String)? textEntry;
   final Function()? action;
   final IconData? icon;
+  final TextCapitalization textCapitalization;
 
   const TextInput({
     Key? key,
@@ -17,6 +18,7 @@ class TextInput extends StatelessWidget {
     this.action,
     this.icon = Icons.check,
     this.private = false,
+    this.textCapitalization = TextCapitalization.none, // agregado
   }) : super(key: key);
 
   Color get fillColor => ThemeController.instance.brightnessValue
@@ -40,6 +42,7 @@ class TextInput extends StatelessWidget {
           TextField(
             obscureText: private,
             controller: controller,
+            textCapitalization: textCapitalization, // agregado
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
               filled: true,
@@ -68,12 +71,14 @@ class LargeTextInput extends StatelessWidget {
   final TextEditingController? controller;
   final String title;
   final Function(String)? textEntry;
+  final TextCapitalization textCapitalization;
 
   const LargeTextInput({
     Key? key,
     this.controller,
     this.title = "",
     this.textEntry,
+    this.textCapitalization = TextCapitalization.sentences, // agregado
   }) : super(key: key);
 
   Color get fillColor => ThemeController.instance.brightnessValue
@@ -97,6 +102,7 @@ class LargeTextInput extends StatelessWidget {
           TextField(
             controller: controller,
             maxLines: 6,
+            textCapitalization: textCapitalization, // agregado
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
               filled: true,

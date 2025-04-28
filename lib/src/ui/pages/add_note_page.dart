@@ -39,6 +39,7 @@ class AddNotePage extends StatelessWidget {
         : defaultArguments;
     return Scaffold(
       backgroundColor: theme.background(),
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           arguments.edit ? "Edición de nota" : "Nueva Nota",
@@ -49,8 +50,9 @@ class AddNotePage extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: fontColor()),
-            onPressed: () => Navigator.pop(context)),
+          icon: Icon(Icons.arrow_back_ios, color: fontColor()),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: _Body(arguments),
     );
@@ -72,7 +74,9 @@ class __BodyState extends State<_Body> {
   String? image;
   Note note = Note();
   final ImagePicker _picker = ImagePicker();
-  FirebaseServices _services = FirebaseServices.instance;
+  final FirebaseServices _services = FirebaseServices.instance;
+
+  bool _saving = false;
 
   String parseDate() {
     final date = DateTime.now();
@@ -134,171 +138,220 @@ class __BodyState extends State<_Body> {
     });
   }
 
+  Future<void> _saveNote() async {
+    if (_saving) return;
+    setState(() {
+      _saving = true;
+    });
+
+    try {
+      note.title = _title.value.text;
+      note.description = _description.value.text;
+      note.private = widget.arguments.private;
+
+      if (image != null) {
+        final url = await CloudinaryService.uploadImage(File(image!));
+        if (url != null) {
+          note.image = url;
+          note.type = TypeNote.ImagenNetwork;
+        } else {
+          note.image = image;
+          note.type = TypeNote.Image;
+        }
+      } else if (widget.arguments.edit && note.image != null) {
+        note.type = note.type ?? TypeNote.Image;
+      }
+
+      final Map<String, dynamic> values = {
+        "date": parseDate(),
+        "description": note.description,
+        "image": note.image ?? "",
+        "private": note.private,
+        "state": note.state.toString(),
+        "title": note.title,
+        "type": note.type.toString(),
+      };
+
+      final Map<String, dynamic> response;
+      if (widget.arguments.edit) {
+        response = await _services.update("notes", note.id!, values);
+      } else {
+        final existingNotes = await FirebaseServices.instance.read("notes");
+        if (existingNotes["status"] == StatusNetwork.Connected) {
+          final List<dynamic> allNotes = existingNotes["data"];
+          for (int i = 0; i < allNotes.length; i++) {
+            final note = allNotes[i];
+            await FirebaseServices.instance.update("notes", note.id!, {
+              "order": (note.order ?? i) + 1,
+            });
+          }
+        }
+        values["order"] = 0;
+        values["deleted"] = false;
+        response = await _services.create("notes", values);
+      }
+
+      switch (response["status"]) {
+        case StatusNetwork.Connected:
+          if (widget.arguments.edit) {
+            Navigator.pop(context, "edit");
+          } else {
+            Navigator.pop(context, true);
+          }
+          break;
+        default:
+          print("Error al guardar nota");
+          break;
+      }
+    } catch (e) {
+      print("Error durante el guardado: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _saving = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.of(context).viewInsets.bottom;
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextInput(
-              title: "Título",
-              controller: _title,
-            ),
-            LargeTextInput(
-              title: "Descripción",
-              controller: _description,
-            ),
-            if (image != null || (widget.arguments.edit && note.image != null))
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 120,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey.shade200,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: _buildImage(),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextInput(
+                            title: "Título",
+                            controller: _title,
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                          LargeTextInput(
+                            title: "Descripción",
+                            controller: _description,
+                          ),
+                          if (image != null ||
+                              (widget.arguments.edit && note.image != null))
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 120,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color: Colors.grey.shade200,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: _buildImage(),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(
+                                      onPressed: _deleteImage,
+                                      icon: Icon(Icons.delete,
+                                          color: Colors.redAccent),
+                                      tooltip: "Eliminar imagen",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: MediumButton(
+                                  title: "Cámara",
+                                  icon: Icons.camera,
+                                  onTap: () async {
+                                    try {
+                                      final XFile? photo =
+                                          await _picker.pickImage(
+                                        source: ImageSource.camera,
+                                      );
+                                      if (photo != null) {
+                                        setState(() {
+                                          image = photo.path;
+                                        });
+                                      }
+                                    } catch (e) {}
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Flexible(
+                                child: MediumButton(
+                                  title: "Galería",
+                                  icon: Icons.image,
+                                  onTap: () async {
+                                    try {
+                                      FilePickerResult? result =
+                                          await FilePicker.platform.pickFiles();
+                                      if (result != null) {
+                                        File file =
+                                            File(result.files.single.path!);
+                                        File? savedFile = await FileServices
+                                            .instance
+                                            .saveBytes(
+                                          result.files.single.name,
+                                          await file.readAsBytes(),
+                                        );
+                                        if (savedFile != null) {
+                                          setState(() {
+                                            image = savedFile.path;
+                                          });
+                                        }
+                                      }
+                                    } catch (e) {
+                                      print(
+                                          "Error al guardar imagen local: $e");
+                                    }
+                                  },
+                                  primaryColor: false,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                        ],
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        onPressed: _deleteImage,
-                        icon: Icon(Icons.delete, color: Colors.redAccent),
-                        tooltip: "Eliminar imagen",
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            Row(
-              children: [
-                Flexible(
-                  child: MediumButton(
-                    title: "Cámara",
-                    icon: Icons.camera,
-                    onTap: () async {
-                      try {
-                        final XFile? photo = await _picker.pickImage(
-                          source: ImageSource.camera,
-                        );
-                        if (photo != null) {
-                          setState(() {
-                            image = photo.path;
-                          });
-                        }
-                      } catch (e) {}
-                    },
-                  ),
+              AnimatedPadding(
+                duration: const Duration(milliseconds: 300),
+                padding: EdgeInsets.only(
+                  bottom: viewInsets > 0 ? viewInsets : 8.0,
+                  top: 8.0,
+                  left: 8.0,
+                  right: 8.0,
                 ),
-                SizedBox(width: 8),
-                Flexible(
-                  child: MediumButton(
-                    title: "Galería",
-                    icon: Icons.image,
-                    onTap: () async {
-                      try {
-                        FilePickerResult? result =
-                            await FilePicker.platform.pickFiles();
-                        if (result != null) {
-                          File file = File(result.files.single.path!);
-                          File? savedFile =
-                              await FileServices.instance.saveBytes(
-                            result.files.single.name,
-                            await file.readAsBytes(),
-                          );
-                          if (savedFile != null) {
-                            setState(() {
-                              image = savedFile.path;
-                            });
-                          }
-                        }
-                      } catch (e) {
-                        print("Error al guardar imagen local: $e");
-                      }
-                    },
-                    primaryColor: false,
-                  ),
+                curve: Curves.easeOut,
+                child: MediumButton(
+                  title: _saving ? "Guardando..." : "Guardar",
+                  onTap: _saving ? null : _saveNote,
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-            MediumButton(
-                title: "Guardar",
-                onTap: () async {
-                  note.title = _title.value.text;
-                  note.description = _description.value.text;
-                  note.private = widget.arguments.private;
-
-                  if (image != null) {
-                    final url =
-                        await CloudinaryService.uploadImage(File(image!));
-                    if (url != null) {
-                      note.image = url;
-                      note.type = TypeNote.ImagenNetwork;
-                    } else {
-                      note.image = image;
-                      note.type = TypeNote.Image;
-                    }
-                  } else if (widget.arguments.edit && note.image != null) {
-                    note.type = note.type ?? TypeNote.Image;
-                  }
-
-                  final Map<String, dynamic> response;
-                  final Map<String, dynamic> values = {
-                    "date": parseDate(),
-                    "description": note.description,
-                    "image": note.image ?? "",
-                    "private": note.private,
-                    "state": note.state.toString(),
-                    "title": note.title,
-                    "type": note.type.toString(),
-                  };
-
-                  if (widget.arguments.edit) {
-                    response =
-                        await _services.update("notes", note.id!, values);
-                  } else {
-                    final existingNotes =
-                        await FirebaseServices.instance.read("notes");
-                    if (existingNotes["status"] == StatusNetwork.Connected) {
-                      final List<dynamic> allNotes = existingNotes["data"];
-                      for (int i = 0; i < allNotes.length; i++) {
-                        final note = allNotes[i];
-                        await FirebaseServices.instance
-                            .update("notes", note.id!, {
-                          "order": (note.order ?? i) + 1,
-                        });
-                      }
-                    }
-                    values["order"] = 0;
-                    values["deleted"] = false;
-                    response = await _services.create("notes", values);
-                  }
-
-                  switch (response["status"]) {
-                    case StatusNetwork.Connected:
-                      if (widget.arguments.edit) {
-                        Navigator.pop(context, "edit");
-                      } else {
-                        Navigator.pop(context, true);
-                      }
-                      break;
-                    default:
-                      print("Error al guardar nota");
-                      break;
-                  }
-                }),
-            SizedBox(height: 40),
-          ],
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
